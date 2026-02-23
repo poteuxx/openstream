@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenStream</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+<h1>OpenStream</h1>
+<input id="search" placeholder="Search">
+</header>
+
+<div id="grid"></div>
+
+<div id="playerModal" class="hidden">
+<div class="player">
+
+<button onclick="closePlayer()">✕</button>
+<h2 id="title"></h2>
+
+<iframe id="playerFrame" allowfullscreen></iframe>
+
+</div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
