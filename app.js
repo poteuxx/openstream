@@ -22,7 +22,6 @@ function buildHome(list=catalog){
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `<img src="${movie.poster}"><div style="text-align:center;padding:5px">${movie.title}</div>`;
-    // Open movie in new tab
     card.onclick = () => window.open(movie.link, "_blank");
     row.appendChild(card);
   });
@@ -44,8 +43,3 @@ searchInput.addEventListener("input", e=>{
   const results = catalog.filter(m => m.title.toLowerCase().includes(q));
   buildHome(results);
 });
-
-// Optional player modal (if you want embedded testing)
-closeBtn.addEventListener("click", ()=>{playerModal.classList.add("hidden"); playerFrame.src="";});
-playerModal.addEventListener("click", e=>{if(e.target===playerModal){playerModal.classList.add("hidden"); playerFrame.src="";}});
-document.addEventListener("keydown", e=>{if(e.key==="Escape"){playerModal.classList.add("hidden"); playerFrame.src="";}});
