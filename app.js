@@ -1,79 +1,56 @@
-let catalog = [];
-let currentPage = 1;
-const pageSize = 20; // small batch to avoid run cancelled
-let isLoading = false;
+// Small static catalog
+const catalog = [
+  {title:"Big Buck Bunny", link:"https://archive.org/details/BigBuckBunny_124", poster:"https://archive.org/services/img/BigBuckBunny_124"},
+  {title:"Sintel", link:"https://archive.org/details/Sintel", poster:"https://archive.org/services/img/Sintel"},
+  {title:"Elephants Dream", link:"https://archive.org/details/ElephantsDream", poster:"https://archive.org/services/img/ElephantsDream"}
+];
 
 // DOM elements
 const content = document.getElementById("content");
-const loading = document.getElementById("loading");
 const searchInput = document.getElementById("search");
 
-// Load movies dynamically from Internet Archive
-async function loadMovies(page = 1){
-    isLoading = true;
-    try{
-        const url = `https://archive.org/advancedsearch.php?q=mediatype%3Amovies&fl[]=identifier,title&rows=${pageSize}&page=${page}&output=json`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const movies = data.response.docs.map(m=>({
-            title: m.title,
-            link: `https://archive.org/details/${m.identifier}`
-        }));
-        catalog = catalog.concat(movies);
-        loading.style.display = "none";
-        buildHome();
-    }catch(e){
-        console.error("Error loading movies", e);
-    }
-    isLoading = false;
+// Player modal
+const playerModal = document.getElementById("playerModal");
+const playerFrame = document.getElementById("playerFrame");
+const playerTitle = document.getElementById("playerTitle");
+const closeBtn = document.getElementById("closeBtn");
+
+// Build page
+function buildHome(list=catalog){
+  content.innerHTML = "";
+  const section = document.createElement("div");
+  section.className = "section";
+  section.innerHTML = "<h2>Movies</h2>";
+  const row = document.createElement("div");
+  row.className = "row";
+
+  list.forEach(movie=>{
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<img src="${movie.poster}"><div style="text-align:center;padding:5px">${movie.title}</div>`;
+    // Open in new tab
+    card.onclick = ()=>window.open(movie.link,"_blank");
+    row.appendChild(card);
+  });
+
+  section.appendChild(row);
+  content.appendChild(section);
 }
 
-// Build home page
-function buildHome(){
-    content.innerHTML = "";
-    createSection("Movies", catalog);
-}
-
-// Create section
-function createSection(title, list){
-    const section = document.createElement("div");
-    section.className = "section";
-    section.innerHTML = `<h2>${title}</h2>`;
-    const row = document.createElement("div");
-    row.className = "row";
-
-    list.forEach(movie=>{
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<img loading="lazy" src="https://archive.org/services/img/${movie.title.replace(/\s/g,'')}"><div style="padding:5px;text-align:center">${movie.title}</div>`;
-        // Open in new tab
-        card.onclick = ()=>window.open(movie.link,"_blank");
-        row.appendChild(card);
-    });
-
-    section.appendChild(row);
-    content.appendChild(section);
-}
+buildHome();
 
 // Search
 searchInput.addEventListener("input", e=>{
-    const q = e.target.value.toLowerCase();
-    if(q.length<2){
-        buildHome();
-        return;
-    }
-    const results = catalog.filter(m=>m.title.toLowerCase().includes(q));
-    content.innerHTML = "";
-    createSection("Search Results", results);
+  const q = e.target.value.toLowerCase();
+  if(q.length<1){
+    buildHome();
+    return;
+  }
+  const results = catalog.filter(m=>m.title.toLowerCase().includes(q));
+  buildHome(results);
 });
 
-// Small batch infinite scroll
-window.addEventListener("scroll", ()=>{
-    if(window.innerHeight + window.scrollY >= document.body.offsetHeight-200 && !isLoading){
-        currentPage++;
-        loadMovies(currentPage);
-    }
-});
-
-// Initial load
-loadMovies(currentPage);
+// Optional player modal (if you want embedded testing)
+closeBtn.addEventListener("click", ()=>{playerModal.classList.add("hidden"); playerFrame.src="";});
+playerModal.addEventListener("click", e=>{if(e.target===playerModal){playerModal.classList.add("hidden"); playerFrame.src="";}});
+document.addEventListener("keydown", e=>{if(e.key==="Escape"){playerModal.classList.add("hidden"); playerFrame.src="";}});
