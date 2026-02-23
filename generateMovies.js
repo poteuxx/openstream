@@ -1,35 +1,42 @@
-const fs = require("fs")
+(async function(){
+    let results = [];
+    const totalPages = 20; // 20 pages × 50 movies = ~1000 movies
 
-async function run(){
+    for(let page=1; page<=totalPages; page++){
+        const url = `https://archive.org/advancedsearch.php?q=mediatype%3Amovies&fl[]=identifier,title&rows=50&page=${page}&output=json`;
 
-let results=[]
+        try{
+            const res = await fetch(url);
+            const data = await res.json();
 
-for(let page=1; page<=50; page++)
-{
-const url=`https://archive.org/advancedsearch.php?q=mediatype%3Amovies&fl[]=identifier,title&rows=50&page=${page}&output=json`
+            data.response.docs.forEach(m=>{
+                if(!m.identifier || !m.title) return;
 
-const res=await fetch(url)
+                results.push({
+                    title: m.title,
+                    poster: `https://archive.org/services/img/${m.identifier}`,
+                    embed: `https://archive.org/embed/${m.identifier}`
+                });
+            });
 
-const data=await res.json()
+            console.log(`Loaded page ${page}, total movies so far: ${results.length}`);
+        }catch(e){
+            console.error("Error fetching page", page, e);
+        }
 
-data.response.docs.forEach(m=>{
+        // Slow down to prevent overloading server
+        await new Promise(r=>setTimeout(r, 500));
+    }
 
-if(!m.identifier || !m.title) return
+    // Convert to JSON string
+    const json = JSON.stringify(results, null, 2);
 
-results.push({
-title:m.title,
-poster:`https://archive.org/services/img/${m.identifier}`,
-embed:`https://archive.org/embed/${m.identifier}`
-})
+    // Trigger download
+    const a = document.createElement("a");
+    const file = new Blob([json], {type: "application/json"});
+    a.href = URL.createObjectURL(file);
+    a.download = "movies.json";
+    a.click();
 
-})
-
-console.log("page",page)
-}
-
-fs.writeFileSync("movies.json",JSON.stringify(results,null,2))
-
-console.log("Total movies:",results.length)
-}
-
-run()
+    console.log("Done! Total movies:", results.length);
+})();
