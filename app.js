@@ -4,32 +4,59 @@ fetch("movies.json")
 .then(r=>r.json())
 .then(data=>{
 catalog = data
-render(catalog)
+buildHome()
 })
 
-function render(list)
+function buildHome()
 {
-const grid = document.getElementById("grid")
-grid.innerHTML=""
+const rows = document.getElementById("rows")
+rows.innerHTML=""
+
+createRow("Trending", shuffle(catalog).slice(0,40))
+
+createRow("Popular", catalog.slice(0,40))
+
+createRow("More Movies", shuffle(catalog).slice(40,80))
+
+createRow("Watch Now", shuffle(catalog).slice(80,120))
+}
+
+function createRow(title,list)
+{
+const rows = document.getElementById("rows")
+
+const row = document.createElement("div")
+row.className="row"
+
+row.innerHTML=`<h2>${title}</h2>`
+
+const scroller = document.createElement("div")
+scroller.className="rowScroll"
 
 list.forEach(movie=>{
 
-const card=document.createElement("div")
+const card = document.createElement("div")
 card.className="card"
 
-card.innerHTML=`
-<img src="${movie.poster}">
-<div style="padding:10px">${movie.title}</div>
-`
+card.innerHTML=`<img src="${movie.poster}">`
 
-card.onclick=()=>open(movie)
+card.onclick = ()=>openPlayer(movie)
 
-grid.appendChild(card)
+scroller.appendChild(card)
 
 })
+
+row.appendChild(scroller)
+
+rows.appendChild(row)
 }
 
-function open(movie)
+function shuffle(array)
+{
+return array.sort(()=>Math.random()-0.5)
+}
+
+function openPlayer(movie)
 {
 document.getElementById("playerModal").classList.remove("hidden")
 
@@ -41,15 +68,25 @@ document.getElementById("playerFrame").src = movie.embed
 function closePlayer()
 {
 document.getElementById("playerModal").classList.add("hidden")
+
 document.getElementById("playerFrame").src=""
 }
 
-document.getElementById("search").addEventListener("input",e=>{
+document.getElementById("search").addEventListener("input", e => {
 
-const q=e.target.value.toLowerCase()
+const q = e.target.value.toLowerCase()
 
-const filtered=catalog.filter(m=>m.title.toLowerCase().includes(q))
+if(q.length < 2)
+{
+buildHome()
+return
+}
 
-render(filtered)
+const results = catalog.filter(m => m.title.toLowerCase().includes(q))
+
+const rows = document.getElementById("rows")
+rows.innerHTML=""
+
+createRow("Results", results)
 
 })
