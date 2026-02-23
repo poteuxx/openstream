@@ -3,8 +3,13 @@ let catalog = []
 fetch("movies.json")
 .then(r=>r.json())
 .then(data=>{
-catalog = data
-buildHome()
+    catalog = data
+    document.getElementById("loading").style.display="none"
+    buildHome()
+})
+.catch(err=>{
+    document.getElementById("loading").innerText = "Failed to load movies.json"
+    console.error(err)
 })
 
 function buildHome()
