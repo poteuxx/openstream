@@ -1,97 +1,84 @@
 let catalog = []
 
+// Load movies.json
 fetch("movies.json")
-.then(r=>r.json())
-.then(data=>{
-    catalog = data
-    document.getElementById("loading").style.display="none"
-    buildHome()
+.then(r => r.json())
+.then(data => {
+    catalog = data;
+    document.getElementById("loading").style.display = "none";
+    buildHome();
 })
-.catch(err=>{
-    document.getElementById("loading").innerText = "Failed to load movies.json"
-    console.error(err)
-})
+.catch(err => {
+    document.getElementById("loading").innerText = "Failed to load movies.json";
+    console.error(err);
+});
 
-function buildHome()
-{
-const rows = document.getElementById("rows")
-rows.innerHTML=""
+// Build home sections
+function buildHome() {
+    const container = document.getElementById("content");
+    container.innerHTML = "";
 
-createRow("Trending", shuffle(catalog).slice(0,40))
-
-createRow("Popular", catalog.slice(0,40))
-
-createRow("More Movies", shuffle(catalog).slice(40,80))
-
-createRow("Watch Now", shuffle(catalog).slice(80,120))
+    createSection("Trending", shuffle(catalog).slice(0,40));
+    createSection("Popular", catalog.slice(0,40));
+    createSection("Recently Added", shuffle(catalog).slice(40,80));
+    createSection("Watch Now", shuffle(catalog).slice(80,120));
 }
 
-function createRow(title,list)
-{
-const rows = document.getElementById("rows")
+// Create a single row section
+function createSection(title, list) {
+    const container = document.getElementById("content");
+    const section = document.createElement("div");
+    section.className = "section";
+    section.innerHTML = `<h2>${title}</h2>`;
 
-const row = document.createElement("div")
-row.className="row"
+    const row = document.createElement("div");
+    row.className = "row";
 
-row.innerHTML=`<h2>${title}</h2>`
+    list.forEach(movie => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<img loading="lazy" src="${movie.poster}">`;
+        card.onclick = () => openPlayer(movie);
+        row.appendChild(card);
+    });
 
-const scroller = document.createElement("div")
-scroller.className="rowScroll"
-
-list.forEach(movie=>{
-
-const card = document.createElement("div")
-card.className="card"
-
-card.innerHTML=`<img src="${movie.poster}">`
-
-card.onclick = ()=>openPlayer(movie)
-
-scroller.appendChild(card)
-
-})
-
-row.appendChild(scroller)
-
-rows.appendChild(row)
+    section.appendChild(row);
+    container.appendChild(section);
 }
 
-function shuffle(array)
-{
-return array.sort(()=>Math.random()-0.5)
+// Shuffle helper
+function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
 }
 
-function openPlayer(movie)
-{
-document.getElementById("playerModal").classList.remove("hidden")
-
-document.getElementById("title").innerText = movie.title
-
-document.getElementById("playerFrame").src = movie.embed
+// Open player
+function openPlayer(movie) {
+    document.getElementById("playerModal").classList.remove("hidden");
+    document.getElementById("playerTitle").innerText = movie.title;
+    document.getElementById("playerFrame").src = movie.embed;
 }
 
-function closePlayer()
-{
-document.getElementById("playerModal").classList.add("hidden")
-
-document.getElementById("playerFrame").src=""
+// Close player
+function closePlayer() {
+    document.getElementById("playerModal").classList.add("hidden");
+    document.getElementById("playerFrame").src = "";
 }
 
+// Search
 document.getElementById("search").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
 
-const q = e.target.value.toLowerCase()
+    if(q.length < 2) {
+        buildHome();
+        return;
+    }
 
-if(q.length < 2)
-{
-buildHome()
-return
+    const results = catalog.filter(m => m.title.toLowerCase().includes(q));
+    showSearch(results);
+});
+
+function showSearch(list) {
+    const container = document.getElementById("content");
+    container.innerHTML = "";
+    createSection("Search Results", list.slice(0,60));
 }
-
-const results = catalog.filter(m => m.title.toLowerCase().includes(q))
-
-const rows = document.getElementById("rows")
-rows.innerHTML=""
-
-createRow("Results", results)
-
-})
