@@ -9,12 +9,6 @@ const catalog = [
 const content = document.getElementById("content");
 const searchInput = document.getElementById("search");
 
-// Player modal
-const playerModal = document.getElementById("playerModal");
-const playerFrame = document.getElementById("playerFrame");
-const playerTitle = document.getElementById("playerTitle");
-const closeBtn = document.getElementById("closeBtn");
-
 // Build page
 function buildHome(list=catalog){
   content.innerHTML = "";
@@ -28,8 +22,8 @@ function buildHome(list=catalog){
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `<img src="${movie.poster}"><div style="text-align:center;padding:5px">${movie.title}</div>`;
-    // Open in new tab
-    card.onclick = ()=>window.open(movie.link,"_blank");
+    // Open movie in new tab
+    card.onclick = () => window.open(movie.link, "_blank");
     row.appendChild(card);
   });
 
@@ -37,16 +31,17 @@ function buildHome(list=catalog){
   content.appendChild(section);
 }
 
+// Initial render
 buildHome();
 
-// Search
+// Search functionality
 searchInput.addEventListener("input", e=>{
   const q = e.target.value.toLowerCase();
-  if(q.length<1){
+  if(q.length < 1){
     buildHome();
     return;
   }
-  const results = catalog.filter(m=>m.title.toLowerCase().includes(q));
+  const results = catalog.filter(m => m.title.toLowerCase().includes(q));
   buildHome(results);
 });
 
