@@ -650,13 +650,19 @@ nt); }
             if(!area) return;
 
             document.querySelectorAll('.g-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`g-${gid}`).classList.add('active');
+            const btn = document.getElementById(`g-${gid}`);
+            if(btn) btn.classList.add('active');
 
             area.innerHTML = '';
             let filtered = mainCatalog.filter(i => i.genreIds.includes(gid));
             if(type !== 'all') filtered = filtered.filter(i => i.type === type);
             
-            filtered.forEach((i, idx) => area.appendChild(createCard(i, idx)));
+            const l = LOCALE[currentLang];
+            const resultMsg = currentLang === 'FR' ? `${filtered.length} TITRE(S) TROUVÉ(S)` : `${filtered.length} TITLE(S) FOUND`;
+            
+            area.innerHTML = `<h2 class="row-title" style="margin-top:20px; font-size:0.8rem; color:var(--accent); letter-spacing:3px;">${resultMsg}</h2><div class="grid-view" id="filterInnerArea"></div>`;
+            const inner = document.getElementById('filterInnerArea');
+            filtered.forEach((i, idx) => inner.appendChild(createCard(i, idx)));
         }
 
         function clearGenreFilter(type) {
