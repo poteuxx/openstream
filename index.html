@@ -649,12 +649,16 @@ nt); }
             const l = LOCALE[currentLang];
             const title = type === 'movie' ? l.films : (type === 'tv' ? l.series : l.docus);
             const grid = document.getElementById('dynamicRows');
+            const items = mainCatalog.filter(i => i.type === type);
+            const resultMsg = currentLang === 'FR' ? `${items.length} TITRE(S) TROUVÉ(S)` : `${items.length} TITLE(S) FOUND`;
+
             grid.innerHTML = `
                 <h2 class="row-title" style="margin-top:100px">${title} PREMIUM</h2>
+                <h3 class="row-title" style="font-size:0.8rem; color:var(--accent); letter-spacing:3px; margin: 10px 0 20px 40px">${resultMsg}</h3>
                 ${renderGenreBar(type)}
                 <div class="grid-view" id="mainGridArea"></div>
             `;
-            mainCatalog.filter(i => i.type === type).forEach((i, idx) => document.getElementById('mainGridArea').appendChild(createCard(i, idx)));
+            items.forEach((i, idx) => document.getElementById('mainGridArea').appendChild(createCard(i, idx)));
         }
 
         function filterGenre(gid, type = 'all') {
