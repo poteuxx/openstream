@@ -332,7 +332,6 @@
             el.innerHTML = `<img src="${item.poster}"><div class="m-overlay"><div class="m-title">${item.title}</div><div style="display:flex; gap:10px"><button class="m-btn" onclick="event.stopPropagation(); openPlayer(mainCatalog.find(i=>i.id==${item.id}))">▶</button><button class="m-btn" onclick="event.stopPropagation(); showItemDetails(mainCatalog.find(i=>i.id==${item.id}))">i</button></div></div>`;
             el.onclick = () => showItemDetails(item);
             el.onmouseenter = () => updateHeroTeaser(item);
-            el.onmouseleave = () => restoreHeroTeaser();
             return el;
         }
 
