@@ -256,7 +256,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             border: 1px solid var(--glass-border);
             color: white;
             display: flex;
@@ -264,9 +264,11 @@
             justify-content: center;
             cursor: pointer;
             z-index: 100;
-            transition: 0.3s;
+            opacity: 0;
+            transition: 0.4s var(--transition);
         }
-        .mute-toggle:hover { background: var(--accent); color: black; border-color: var(--accent); }
+        .hero:hover .mute-toggle { opacity: 1; }
+        .mute-toggle.active-sound { background: var(--accent); color: black; border-color: var(--accent); box-shadow: 0 0 20px var(--accent); }
         .btn-main {
             padding: 14px 28px;
             border-radius: 12px;
@@ -322,8 +324,26 @@
 
         .side-preview { width: 100%; height: 180px; background: #000; position: relative; border-bottom: 1px solid var(--glass-border); display: none; }
         .side-preview iframe { width: 100%; height: 100%; border: none; }
-        .preview-mute { position: absolute; bottom: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-        .preview-mute:hover { background: var(--accent); color: #000; }
+        .preview-mute { 
+            position: absolute; 
+            bottom: 10px; 
+            right: 10px; 
+            width: 34px; 
+            height: 34px; 
+            border-radius: 50%; 
+            background: rgba(0,0,0,0.6); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #fff; 
+            cursor: pointer; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            opacity: 0; 
+            transition: 0.3s;
+            z-index: 10;
+        }
+        .side-preview:hover .preview-mute { opacity: 1; }
+        .preview-mute.active-sound { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
 
         .side-body { padding: 25px; }
         .side-title { font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
@@ -948,9 +968,18 @@
         function togglePrevSound() {
             if(!pPlayer) return;
             pMuted = !pMuted;
+            const btn = document.getElementById('pMuteBtn');
             const icon = document.getElementById('pMuteIcon');
-            if(pMuted) { pPlayer.mute(); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/>'; }
-            else { pPlayer.unMute(); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>'; }
+            if(pMuted) { 
+                pPlayer.mute(); 
+                btn.classList.remove('active-sound');
+                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/>'; 
+            }
+            else { 
+                pPlayer.unMute(); 
+                btn.classList.add('active-sound');
+                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>'; 
+            }
         }
 
         async function showItemDetails(item) {
@@ -1141,12 +1170,15 @@
         function toggleHeroSound() {
             if(!ytPlayer) return;
             isMuted = !isMuted;
+            const btn = document.getElementById('muteBtn');
             const icon = document.getElementById('volIcon');
             if(isMuted) {
                 ytPlayer.mute();
+                btn.classList.remove('active-sound');
                 icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
             } else {
                 ytPlayer.unMute();
+                btn.classList.add('active-sound');
                 icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>';
             }
         }
