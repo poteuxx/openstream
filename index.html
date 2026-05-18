@@ -467,8 +467,10 @@
         .actor-tag { background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
 
         /* BRUT PLAYER SYSTEM */
-        .player-frame { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; background: black; }
+        .player-frame { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; background: #000; border-radius: 12px; overflow: hidden; }
         .player-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        
+        .brut-factory { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; color: var(--accent); font-weight: 800; font-family: monospace; letter-spacing: 2px; }
         
         .brut-controls {
             background: #000;
@@ -643,20 +645,16 @@
 
     <!-- REBULD PLAYER MODAL -->
     <div class="modal" id="pModal">
-        <div class="m-content">
+        <div class="m-content" style="max-width: 1100px;">
             <div class="m-close" onclick="closePlayer()">&times;</div>
-            <div class="player-frame">
-                <iframe id="brutPlayer" 
-                        allowfullscreen 
-                        allow="autoplay; encrypted-media; fullscreen"
-                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation">
-                </iframe>
+            <div class="player-frame" id="playerWrapper">
+                <!-- Iframe dynamically injected by BrutFactory -->
             </div>
             <div class="brut-controls">
                 <div class="server-wrap" id="svGrid"></div>
-                <button class="repair-brut" onclick="reclaimPlayer()">
+                <button class="repair-brut" id="forceBypass" onclick="reclaimPlayer(true)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 10l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                    RÉPARER LE FLUX
+                    FORCE BYPASS
                 </button>
             </div>
         </div>
@@ -891,24 +889,23 @@
 
         function scrollRow(id, dir) {
             const el = document.getElementById(`row-${id}`);
-            el.scrollLeft += (dir * 800);
+            if(el) el.scrollLeft += (dir * 800);
         }
 
         /* ----------------------------------------------------
-           BRUT LOADER SYSTEM (ANTI-BLOCKED)
+           BRUT FACTORY (REBUILT AGRESSIVE BYPASS)
         ---------------------------------------------------- */
-        function openPlayer(item, serverId = 'vl') {
+        function openPlayer(item, serverId = 'vl', forceRaw = false) {
             activeItem = item;
             activeServer = serverId;
             
-            // Optimization: Stop the Hero Trailer background video
             if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
             
             const modal = document.getElementById('pModal');
-            const iframe = document.getElementById('brutPlayer');
+            const wrapper = document.getElementById('playerWrapper');
             const svGrid = document.getElementById('svGrid');
             
-            // Rebuild Server Buttons
+            // Server UI
             svGrid.innerHTML = '';
             SERVERS.forEach(s => {
                 const b = document.createElement('button');
@@ -918,22 +915,54 @@
                 svGrid.appendChild(b);
             });
 
+            // Iframe Initialization
+            wrapper.innerHTML = '<div class="brut-factory">SYSTÈME DE CONTOURNEMENT ACTIF...</div>';
+            
             const server = SERVERS.find(s => s.id === activeServer);
-            iframe.src = server.url(activeItem);
+            const targetUrl = server.url(activeItem);
+
+            setTimeout(() => {
+                const ifr = document.createElement('iframe');
+                ifr.src = targetUrl;
+                ifr.allowFullscreen = true;
+                ifr.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+                
+                // FORCE BYPASS LOGIC: Strip sandbox if forced or if using sensitive servers
+                if(!forceRaw) {
+                    ifr.setAttribute('sandbox', 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups allow-popups-to-escape-sandbox');
+                }
+                
+                wrapper.innerHTML = '';
+                wrapper.appendChild(ifr);
+                console.log(`[OX BYPASS] ${forceRaw ? 'RAW_FORCE' : 'SAFE_LOAD'} | Flux: ${targetUrl}`);
+            }, 800);
+
             modal.style.display = 'flex';
             requestAnimationFrame(() => modal.classList.add('active'));
             document.body.style.overflow = 'hidden';
+        }
+
+        function reclaimPlayer(force = false) {
+            if(!activeItem) return;
+            console.warn("[OX RECOVERY] Rebuilding Player with High-Priority Bypass...");
             
-            console.log(`[OX] Player Mode: ON | Server: ${activeServer}`);
+            if(force) {
+                // If user clicks "FORCE BYPASS", we reload the CURRENT server but without any sandbox restrictions
+                openPlayer(activeItem, activeServer, true);
+            } else {
+                // Cycle to next server normally
+                const idx = SERVERS.findIndex(s => s.id === activeServer);
+                const next = SERVERS[(idx + 1) % SERVERS.length];
+                openPlayer(activeItem, next.id);
+            }
         }
 
         function closePlayer() {
             document.getElementById('pModal').classList.remove('active');
             setTimeout(() => {
                 document.getElementById('pModal').style.display = 'none';
-                document.getElementById('brutPlayer').src = '';
+                document.getElementById('playerWrapper').innerHTML = '';
                 document.body.style.overflow = '';
-                // Resume Hero Trailer if active
                 if(ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
             }, 400);
         }
