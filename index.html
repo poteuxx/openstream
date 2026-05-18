@@ -32,11 +32,13 @@
         body { background: var(--bg-deep); color: var(--text); overflow-x: hidden; min-height: 100vh; scroll-behavior: smooth; }
 
         /* HEADER */
-        header { position: fixed; top: 0; width: 100%; z-index: 2000; display: flex; align-items: center; height: 90px; padding: 0 40px; background: var(--glass); backdrop-filter: blur(30px); border-bottom: 1px solid var(--glass-border); }
-        .logo { display: flex; align-items: center; gap: 20px; text-decoration: none; cursor: pointer; transition: 0.4s var(--transition); margin-right: 30px; }
+        header { position: fixed; top: 0; width: 100%; z-index: 2000; display: flex; align-items: center; justify-content: center; height: 90px; padding: 0 40px; background: var(--glass); backdrop-filter: blur(30px); border-bottom: 1px solid var(--glass-border); }
+        .h-left { position: absolute; left: 40px; display: flex; align-items: center; gap: 30px; }
+        .logo { display: flex; align-items: center; gap: 20px; text-decoration: none; cursor: pointer; transition: 0.4s var(--transition); }
         .logo:hover { transform: scale(1.03); }
-        
         .hist-nav { display: flex; gap: 10px; }
+
+        .h-right { position: absolute; right: 40px; display: flex; align-items: center; gap: 20px; }
         .h-btn { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
         .h-btn:hover { background: var(--accent); color: black; border-color: var(--accent); }
         .logo-badge { width: 50px; height: 50px; background: linear-gradient(135deg, #00f2ff, #9d50bb, #00f2ff); background-size: 200% 200%; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 950; color: white; font-size: 1.4rem; box-shadow: 0 0 35px var(--accent-glow); animation: logoPulse 4s infinite, logoGradiant 6s infinite; border: 1px solid rgba(255,255,255,0.3); position: relative; overflow: hidden; }
@@ -165,23 +167,27 @@
     </div>
 
     <header id="mainHeader">
-        <div class="logo" onclick="switchView('home')">
-            <div class="logo-badge">OS</div>
-            <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span id="logoBrand">SOLUTIONS TECHNOLOGIES</span></div>
+        <div class="h-left">
+            <div class="logo" onclick="switchView('home')">
+                <div class="logo-badge">OS</div>
+                <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span id="logoBrand">SOLUTIONS TECHNOLOGIES</span></div>
+            </div>
+            <div class="hist-nav">
+                <button class="h-btn" onclick="history.back()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg></button>
+                <button class="h-btn" onclick="history.forward()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"></path></svg></button>
+            </div>
         </div>
-        <div class="hist-nav">
-            <button class="h-btn" onclick="history.back()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg></button>
-            <button class="h-btn" onclick="history.forward()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"></path></svg></button>
-        </div>
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 20px;">
-            <nav id="topNav">
-                <div class="nav-pill" id="navPill"></div>
-                <a class="nav-link active" id="navHome" onmouseenter="navHover('home')" onclick="switchView('home')">ACCUEIL</a>
-                <a class="nav-link" id="navFilms" onmouseenter="navHover('movie')" onclick="switchView('movie')">FILMS</a>
-                <a class="nav-link" id="navSeries" onmouseenter="navHover('tv')" onclick="switchView('tv')">SÉRIES</a>
-                <a class="nav-link" id="navDocus" onmouseenter="navHover('docu')" onclick="switchView('docu')">DOCUS</a>
-                <a class="nav-link" id="navAbout" onmouseenter="navHover('about')" onclick="switchView('about')">À PROPOS</a>
-            </nav>
+
+        <nav id="topNav">
+            <div class="nav-pill" id="navPill"></div>
+            <a class="nav-link active" id="navHome" onmouseenter="navHover('home')" onclick="switchView('home')">ACCUEIL</a>
+            <a class="nav-link" id="navFilms" onmouseenter="navHover('movie')" onclick="switchView('movie')">FILMS</a>
+            <a class="nav-link" id="navSeries" onmouseenter="navHover('tv')" onclick="switchView('tv')">SÉRIES</a>
+            <a class="nav-link" id="navDocus" onmouseenter="navHover('docu')" onclick="switchView('docu')">DOCUS</a>
+            <a class="nav-link" id="navAbout" onmouseenter="navHover('about')" onclick="switchView('about')">À PROPOS</a>
+        </nav>
+
+        <div class="h-right">
             <div class="search-shell">
                 <input type="text" id="masterSearch" placeholder="Rechercher...">
                 <div class="search-btn"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></div>
