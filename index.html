@@ -345,10 +345,26 @@
                     <h2>Exploration Dashboard</h2>
                     <p>Découvrez <b>${mainCatalog.length} titres</b> premium automatisés.</p>
                 </div>
-                <div class="grid-view" id="mainHomeGrid"></div>
+                <div id="mainHomeContent"></div>
             `;
-            const area = document.getElementById('mainHomeGrid');
-            mainCatalog.slice(0,20).forEach(i => area.appendChild(createCard(i)));
+            const area = document.getElementById('mainHomeContent');
+            
+            const layout = [
+                { t: 'TENDANCES DU MOMENT', items: mainCatalog.slice(0, 12) },
+                { t: 'FILMS INCONTOURNABLES', items: mainCatalog.filter(i => i.type === 'movie').slice(0, 12) },
+                { t: 'SÉRIES ÉLITES', items: mainCatalog.filter(i => i.type === 'tv').slice(0, 12) },
+                { t: 'DOCUMENTAIRES RÉCENTS', items: mainCatalog.filter(i => i.type === 'docu').slice(0, 12) }
+            ];
+
+            layout.forEach(sec => {
+                if(sec.items.length === 0) return;
+                const row = document.createElement('div');
+                row.className = 'row-section';
+                row.style.marginBottom = '60px';
+                row.innerHTML = `<h2 class="row-title">${sec.t}</h2><div class="grid-view"></div>`;
+                sec.items.forEach(i => row.querySelector('.grid-view').appendChild(createCard(i)));
+                area.appendChild(row);
+            });
         }
 
         function renderGrid(type) {
