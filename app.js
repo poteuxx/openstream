@@ -1,4 +1,4 @@
-```javascript
+
 const catalog = [
     {
         title: "Big Buck Bunny",
@@ -57,4 +57,3 @@ const catalog = [
 
 const content = document.getElementById("content");
 const search
-```
