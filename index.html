@@ -51,7 +51,7 @@
         /* GLOBAL HERO ENGINE (NETFLIX STYLE) */
         .hero { position: relative; width: 100%; height: 92vh; display: flex; align-items: flex-end; padding: 0 60px 150px; overflow: hidden; background: #000; }
         #heroTrailer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; transform: scale(1.15); transition: opacity 0.8s; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, var(--bg-deep) 100%), linear-gradient(90deg, rgba(0,0,0,0.8) 0%, transparent 60%); z-index: 3; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, var(--bg-deep) 100%), linear-gradient(90deg, rgba(0,0,0,0.7) 0%, transparent 70%); z-index: 3; }
         .hero-content { position: relative; z-index: 10; max-width: 45%; pointer-events: auto; }
         
         .hero-h1 { font-size: 3.5rem; font-weight: 950; line-height: 1.1; margin-bottom: 15px; text-shadow: 0 5px 25px rgba(0,0,0,1); }
@@ -253,10 +253,18 @@
             document.getElementById('hDesc').innerText = item.overview;
             
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
-            const tr = res.results.find(v => v.type==='Trailer');
+            const tr = res.results ? res.results.find(v => v.type==='Trailer' || v.type==='Teaser') : null;
             if(tr && window.YT) {
-                if(ytPlayer) ytPlayer.loadVideoById(tr.key);
-                else ytPlayer = new YT.Player('heroTrailer', { videoId: tr.key, playerVars: { autocomplete:0, autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key }, events: { onReady: e => e.target.playVideo() } });
+                if(ytPlayer && ytPlayer.loadVideoById) {
+                    ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
+                    ytPlayer.playVideo();
+                } else {
+                    ytPlayer = new YT.Player('heroTrailer', {
+                        videoId: tr.key,
+                        playerVars: { autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key, fs: 0, iv_load_policy: 3, rel: 0 },
+                        events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
+                    });
+                }
             }
         }
 
@@ -322,9 +330,9 @@
             document.getElementById('hDesc').innerText = item.overview;
             
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
-            const tr = res.results.find(v => v.type==='Trailer');
-            if(tr) {
-                ytPlayer.loadVideoById(tr.key);
+            const tr = res.results ? res.results.find(v => v.type==='Trailer' || v.type==='Teaser') : null;
+            if(tr && ytPlayer && ytPlayer.loadVideoById) {
+                ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
                 ytPlayer.playVideo();
                 document.getElementById('heroTrailer').style.opacity = '1';
             }
