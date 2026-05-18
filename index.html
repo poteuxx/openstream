@@ -326,17 +326,51 @@
             document.getElementById('hInfoBtn').innerText = l.details;
         }
 
+        function playCurrentHero() { if(heroItem) openPlayer(heroItem); }
+        function infoCurrentHero() { if(heroItem) showItemDetails(heroItem); }
+
         function switchView(view) {
             currentView = view;
             document.querySelectorAll('.nav-link').forEach(l => {
                 l.classList.remove('active');
                 if(l.getAttribute('onclick').includes(`'${view}'`)) l.classList.add('active');
             });
-            const grid = document.getElementById('dynamicRows'); grid.innerHTML = '';
+            const grid = document.getElementById('dynamicRows');
+            grid.innerHTML = '';
+            
             if(view === 'home') renderDashboard();
             else if(view === 'about') renderAbout();
             else renderGrid(view);
             window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function renderAbout() {
+            document.getElementById('dynamicRows').innerHTML = `
+                <div class="welcome-panel" style="text-align:left; align-items:flex-start; max-width:1100px; margin: 100px auto; gap:20px;">
+                    <h2 style="margin-bottom:20px">À Propos d'OpenStream PRO</h2>
+                    <p style="font-size:1.15rem; line-height:1.7; color:#cbd5e1; margin-bottom:30px">
+                        <b>OpenStream PRO</b> est une solution industrielle de centralisation multimédia développée par <b>Solutions Technologies</b>. 
+                        Notre plateforme utilise un moteur d'automation de pointe pour synchroniser les métadonnées TMDB en temps réel, offrant une interface premium, fluide et sans publicité.
+                    </p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; width:100%">
+                        <div>
+                            <h3 style="color:var(--accent); margin-bottom:10px; font-size:1rem; letter-spacing:1px">AUTOMATION ENGINE</h3>
+                            <p style="color:#94a3b8; font-size:0.9rem; line-height:1.6">
+                                Synchronisation instantanée de 300+ titres avec bandes-annonces héroïques, biographies d'acteurs et failover automatique.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--accent); margin-bottom:10px; font-size:1rem; letter-spacing:1px">INFRASTRUCTURE</h3>
+                            <p style="color:#94a3b8; font-size:0.9rem; line-height:1.6">
+                                Réseau de 24 serveurs haute performance (Industrie 1-24) garantissant une disponibilité maximale et une lecture fluide.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="margin-top:40px; padding:20px; border-top:1px solid var(--glass-border); width:100%; font-size:0.8rem; color:#64748b">
+                        © 2024 Solutions Technologies. Tous droits réservés.
+                    </div>
+                </div>
+            `;
         }
 
         function renderDashboard() {
