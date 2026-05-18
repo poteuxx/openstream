@@ -254,7 +254,11 @@
             }));
             const seen = new Set();
             mainCatalog = mainCatalog.filter(i => { const d = seen.has(i.id + i.type); seen.add(i.id + i.type); return !d; });
-            initHero(mainCatalog[0]);
+            
+            // RANDOM HERO SELECTION (Variety Engine)
+            const poolSize = Math.min(mainCatalog.length, 20);
+            const randomIdx = Math.floor(Math.random() * poolSize);
+            initHero(mainCatalog[randomIdx]);
         }
 
         async function initHero(item) {
