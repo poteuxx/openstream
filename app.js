@@ -1,4 +1,3 @@
-
 const catalog = [
     {
         title: "Big Buck Bunny",
