@@ -48,6 +48,14 @@
         .search-shell:hover input, .search-shell:focus-within input { opacity: 1; }
         .search-btn { position: absolute; right: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: var(--accent); transition: 0.3s; }
 
+        /* SYSTEM & GENRE BUTTONS */
+        .genre-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .g-btn { background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); color: #94a3b8; padding: 8px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 0.75rem; text-transform: uppercase; }
+        .g-btn:hover, .g-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0, 242, 255, 0.08); }
+        
+        .sys-toggle { background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: white; padding: 8px 15px; border-radius: 10px; font-weight: 950; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; margin-left: 15px; }
+        .sys-toggle:hover { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent-glow); }
+
         /* GLOBAL HERO ENGINE (NETFLIX STYLE) */
         .hero { position: relative; width: 100%; height: 92vh; display: flex; align-items: flex-end; padding: 0 60px 150px; overflow: hidden; background: #000; }
         #heroTrailer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; transform: scale(1.15); transition: opacity 0.8s; }
@@ -115,15 +123,18 @@
             <div class="logo-text"><h1>OPEN STREAM</h1><span>BY SOLUTIONS TECHNOLOGIES</span></div>
         </div>
         <nav>
-            <a class="nav-link active" onclick="switchView('home')">ACCEUIL</a>
-            <a class="nav-link" onclick="switchView('movie')">FILMS</a>
-            <a class="nav-link" onclick="switchView('tv')">SÉRIES</a>
-            <a class="nav-link" onclick="switchView('docu')">DOCUS</a>
-            <a class="nav-link" onclick="switchView('about')">À PROPOS</a>
+            <a class="nav-link active" id="navHome" onclick="switchView('home')">ACCUEIL</a>
+            <a class="nav-link" id="navFilms" onclick="switchView('movie')">FILMS</a>
+            <a class="nav-link" id="navSeries" onclick="switchView('tv')">SÉRIES</a>
+            <a class="nav-link" id="navDocus" onclick="switchView('docu')">DOCUS</a>
+            <a class="nav-link" id="navAbout" onclick="switchView('about')">À PROPOS</a>
         </nav>
-        <div class="search-shell">
-            <input type="text" id="masterSearch" placeholder="Rechercher un titre...">
-            <div class="search-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+        <div style="display:flex; align-items:center;">
+            <div class="search-shell">
+                <input type="text" id="masterSearch" placeholder="...">
+                <div class="search-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+            </div>
+            <button class="sys-toggle" onclick="toggleConfig()" id="btnSys">CONFIG</button>
         </div>
     </header>
 
@@ -134,8 +145,8 @@
             <h1 class="hero-h1" id="hTitle">Chargement...</h1>
             <p class="hero-p" id="hDesc">Syncing catalog high-intensity buffers...</p>
             <div style="display:flex; gap:25px">
-                <button class="btn-main btn-primary" onclick="playCurrentHero()">LECTURE</button>
-                <button class="btn-main btn-sec" onclick="infoCurrentHero()">DÉTAILS</button>
+                <button class="btn-main btn-primary" id="hPlayBtn" onclick="playCurrentHero()">LECTURE</button>
+                <button class="btn-main btn-sec" id="hInfoBtn" onclick="infoCurrentHero()">DÉTAILS</button>
             </div>
         </div>
         <button class="mute-toggle" id="muteBtn" onclick="toggleHeroSound()">
@@ -189,6 +200,16 @@
         let pMuted = true;
         let activeItem = null;
         let activeServerId = 's1';
+        let currentView = 'home';
+        let playerIsReady = false;
+        let heroQueueItem = null;
+        let currentLang = 'FR';
+        let voiceEnabled = false;
+
+        const LOCALE = {
+            FR: { home:'ACCUEIL', films:'FILMS', series:'SÉRIES', docus:'DOCUS', about:'À PROPOS', search:'Rechercher...', config:'CONFIG', play:'LECTURE', details:'DÉTAILS', welcome:'Exploration Dashboard', subWel: 'Découvrez {n} titres premium automatisés.' },
+            EN: { home:'HOME', films:'MOVIES', series:'SERIES', docus:'DOCUS', about:'ABOUT', search:'Search titles...', config:'SYSTEM', play:'PLAY NOW', details:'DETAILS', welcome:'Discovery Console', subWel: 'Explore {n} high-performance automated titles.' }
+        };
 
         const SERVERS = [
             { id: 's1', name: 'INDUSTRIE 1', url: i => `https://frembed.pro/api/${i.type==='tv'?'serie':'film'}.php?id=${i.tmdbId}` },
@@ -217,14 +238,12 @@
             { id: 's24', name: 'INDUSTRIE 24', url: i => `https://vidsrc.icu/embed/${i.type==='tv'?'tv':'movie'}/${i.tmdbId}` }
         ];
 
-        let playerIsReady = false;
-        let heroQueueItem = null;
-
         window.onload = async () => {
             loadYTAPI();
             await syncCatalog();
             setupSearch();
             switchView('home');
+            updateUI();
         };
 
         function loadYTAPI() {
@@ -240,7 +259,7 @@
         async function syncCatalog() {
             const endpoints = ['trending/all/day', 'movie/popular', 'tv/popular', 'discover/movie?with_genres=99'];
             let calls = [];
-            // MASSIVE FETCH: 8 pages per endpoint to secure 300+ items
+            // MASSIVE FETCH: 300+ items
             endpoints.forEach(ep => { for(let p=1; p<=8; p++) calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=fr-FR&page=${p}`); });
             const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
             let raw = [];
@@ -257,57 +276,55 @@
             }));
             const seen = new Set();
             mainCatalog = mainCatalog.filter(i => { const d = seen.has(i.id + i.type); seen.add(i.id + i.type); return !d; });
-            
-            // RANDOM HERO SELECTION (Variety Engine)
-            const poolSize = Math.min(mainCatalog.length, 50);
-            const randomIdx = Math.floor(Math.random() * poolSize);
-            initHero(mainCatalog[randomIdx]);
+            const rIdx = Math.floor(Math.random() * Math.min(mainCatalog.length, 50));
+            initHero(mainCatalog[rIdx]);
         }
 
         async function initHero(item) {
             heroItem = item;
             document.getElementById('hTitle').innerText = item.title;
             document.getElementById('hDesc').innerText = item.overview;
-            
             if(!playerIsReady) { heroQueueItem = item; return; }
-            
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
             const tr = res.results ? res.results.find(v => v.type==='Trailer' || v.type==='Teaser') : null;
-            if(tr) {
-                if(ytPlayer && ytPlayer.loadVideoById) {
-                    ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
-                    ytPlayer.playVideo();
-                } else {
-                    ytPlayer = new YT.Player('heroTrailer', {
-                        videoId: tr.key,
-                        playerVars: { 
-                            autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key, 
-                            fs: 0, iv_load_policy: 3, rel: 0, origin: window.location.origin 
-                        },
-                        events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
-                    });
-                }
+            if(tr && ytPlayer && ytPlayer.loadVideoById) {
+                ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
+                ytPlayer.playVideo();
+            } else if(tr) {
+                ytPlayer = new YT.Player('heroTrailer', {
+                    videoId: tr.key,
+                    playerVars: { autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key, fs: 0, iv_load_policy: 3, rel: 0, origin: window.location.origin },
+                    events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
+                });
             }
         }
 
-        function toggleHeroSound() {
-            if(!ytPlayer) return; pMuted = !pMuted;
-            const btn = document.getElementById('muteBtn');
-            const icon = document.getElementById('volIcon');
-            if(pMuted) { 
-                ytPlayer.mute(); 
-                btn.classList.remove('active-sound');
-                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
-            }
-            else { 
-                ytPlayer.unMute(); 
-                btn.classList.add('active-sound');
-                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
-            }
+        function toggleConfig() {
+            currentLang = currentLang === 'FR' ? 'EN' : 'FR';
+            voiceEnabled = !voiceEnabled;
+            updateUI();
+            speak(currentLang === 'FR' ? "Système mis à jour" : "System Updated");
         }
 
-        function playCurrentHero() { openPlayer(heroItem); }
-        function infoCurrentHero() { showItemDetails(heroItem); }
+        function updateUI() {
+            const l = LOCALE[currentLang];
+            document.getElementById('navHome').innerText = l.home;
+            document.getElementById('navFilms').innerText = l.films;
+            document.getElementById('navSeries').innerText = l.series;
+            document.getElementById('navDocus').innerText = l.docus;
+            document.getElementById('navAbout').innerText = l.about;
+            document.getElementById('masterSearch').placeholder = l.search;
+            document.getElementById('btnSys').innerText = l.config;
+            document.getElementById('hPlayBtn').innerText = l.play;
+            document.getElementById('hInfoBtn').innerText = l.details;
+        }
+
+        function speak(txt) {
+            if(!voiceEnabled) return;
+            const s = new SpeechSynthesisUtterance(txt);
+            s.lang = currentLang === 'FR' ? 'fr-FR' : 'en-US';
+            window.speechSynthesis.speak(s);
+        }
 
         function switchView(view) {
             currentView = view;
@@ -315,64 +332,26 @@
                 l.classList.remove('active');
                 if(l.getAttribute('onclick').includes(`'${view}'`)) l.classList.add('active');
             });
-            const grid = document.getElementById('dynamicRows');
-            grid.innerHTML = '';
-            
-            if(view === 'home') { renderDashboard(); }
-            else if(view === 'about') { renderAbout(); }
-            else { renderGrid(view); }
+            const grid = document.getElementById('dynamicRows'); grid.innerHTML = '';
+            if(view === 'home') renderDashboard();
+            else if(view === 'about') renderAbout();
+            else renderGrid(view);
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function renderAbout() {
-            document.getElementById('dynamicRows').innerHTML = `
-                <div class="welcome-panel" style="text-align:left; align-items:flex-start; max-width:1000px; margin: 100px auto;">
-                    <h2 style="margin-bottom:30px">À Propos d'OpenStream PRO</h2>
-                    <p style="font-size:1.2rem; line-height:1.8; color:#cbd5e1; margin-bottom:40px">
-                        <b>OpenStream PRO</b> est une interface de divertissement de nouvelle génération, conçue par <b>Solutions Technologies</b>. 
-                        Notre mission est de centraliser l'accès à la culture cinématographique mondiale via une architecture 100% automatisée et haute performance.
-                    </p>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px">
-                        <div>
-                            <h3 style="color:var(--accent); margin-bottom:15px">TECHNOLOGIE</h3>
-                            <p style="color:#94a3b8; font-size:0.9rem">
-                                Alimenté par l'API TMDB, notre moteur synchronise en temps réel des milliers de titres, bandes-annonces et métadonnées pour offrir une expérience sans latence.
-                            </p>
-                        </div>
-                        <div>
-                            <h3 style="color:var(--accent); margin-bottom:15px">ENGAGEMENT</h3>
-                            <p style="color:#94a3b8; font-size:0.9rem">
-                                Nous nous efforçons de fournir l'interface la plus propre et la plus immersive du marché, sans publicité intrusive et avec une failover-grid de 24 serveurs.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
         function renderDashboard() {
+            const l = LOCALE[currentLang];
             const grid = document.getElementById('dynamicRows');
-            grid.innerHTML = `
-                <div class="welcome-panel">
-                    <h2>Exploration Dashboard</h2>
-                    <p>Découvrez <b>${mainCatalog.length} titres</b> premium automatisés.</p>
-                </div>
-                <div id="mainHomeContent"></div>
-            `;
+            grid.innerHTML = `<div class="welcome-panel"><h2>${l.welcome}</h2><p>${l.subWel.replace('{n}', mainCatalog.length)}</p></div><div class="genre-bar"><button class="g-btn" onclick="filterGenre(28)">Action</button><button class="g-btn" onclick="filterGenre(12)">Aventure</button><button class="g-btn" onclick="filterGenre(14)">Fantastique</button><button class="g-btn" onclick="filterGenre(53)">Suspense</button><button class="g-btn" onclick="switchView('home')">ALL</button></div><div id="mainHomeContent"></div>`;
             const area = document.getElementById('mainHomeContent');
-            
             const layout = [
                 { t: 'TENDANCES DU MOMENT', items: mainCatalog.slice(0, 24) },
                 { t: 'FILMS INCONTOURNABLES', items: mainCatalog.filter(i => i.type === 'movie').slice(0, 24) },
                 { t: 'SÉRIES ÉLITES', items: mainCatalog.filter(i => i.type === 'tv').slice(0, 24) },
                 { t: 'DOCUMENTAIRES RÉCENTS', items: mainCatalog.filter(i => i.type === 'docu').slice(0, 24) }
             ];
-
             layout.forEach(sec => {
-                if(sec.items.length === 0) return;
-                const row = document.createElement('div');
-                row.className = 'row-section';
-                row.style.marginBottom = '60px';
+                const row = document.createElement('div'); row.style.marginBottom = '60px';
                 row.innerHTML = `<h2 class="row-title">${sec.t}</h2><div class="grid-view"></div>`;
                 sec.items.forEach(i => row.querySelector('.grid-view').appendChild(createCard(i)));
                 area.appendChild(row);
@@ -380,53 +359,47 @@
         }
 
         function renderGrid(type) {
+            const l = LOCALE[currentLang];
+            const title = type === 'movie' ? l.films : (type === 'tv' ? l.series : l.docus);
             const grid = document.getElementById('dynamicRows');
-            grid.innerHTML = `<h2 class="row-title" style="margin-top:100px">${type.toUpperCase()}S PREMIUM</h2><div class="grid-view" id="mainGridArea"></div>`;
+            grid.innerHTML = `<h2 class="row-title" style="margin-top:100px">${title} PREMIUM</h2><div class="grid-view" id="mainGridArea"></div>`;
             mainCatalog.filter(i => i.type === type).forEach(i => document.getElementById('mainGridArea').appendChild(createCard(i)));
         }
 
+        function filterGenre(gid) {
+            const grid = document.getElementById('dynamicRows');
+            grid.innerHTML = `<h2 class="row-title" style="margin-top:100px">GENRE: ${gid}</h2><div class="grid-view" id="genArea"></div>`;
+            mainCatalog.filter(i => i.genreIds.includes(gid)).forEach(i => document.getElementById('genArea').appendChild(createCard(i)));
+            speak(currentLang === 'FR' ? "Filtrage activé" : "Filter active");
+        }
+
         function createCard(item) {
-            const el = document.createElement('div');
-            el.className = 'm-card';
+            const el = document.createElement('div'); el.className = 'm-card';
             el.innerHTML = `<img src="${item.poster}"><div class="m-overlay"><div class="m-title">${item.title}</div><div style="display:flex; gap:10px"><button class="m-btn" onclick="event.stopPropagation(); openPlayer(mainCatalog.find(i=>i.id==${item.id}))">▶</button><button class="m-btn" onclick="event.stopPropagation(); showItemDetails(mainCatalog.find(i=>i.id==${item.id}))">i</button></div></div>`;
             el.onclick = () => showItemDetails(item);
             el.onmouseenter = () => updateHeroTeaser(item);
             return el;
         }
 
-        async function updateHeroTeaser(item, isRestore = false) {
-            if(!ytPlayer) return;
-            
-            // Update Text in Real-Time
+        async function updateHeroTeaser(item) {
+            heroItem = item;
             document.getElementById('hTitle').innerText = item.title;
             document.getElementById('hDesc').innerText = item.overview;
-            
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
             const tr = res.results ? res.results.find(v => v.type==='Trailer' || v.type==='Teaser') : null;
-            if(tr && ytPlayer && ytPlayer.loadVideoById) {
-                ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
-                ytPlayer.playVideo();
-                document.getElementById('heroTrailer').style.opacity = '1';
-            }
+            if(tr && ytPlayer && ytPlayer.loadVideoById) ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
         }
 
-        function restoreHeroTeaser() { if(heroItem) updateHeroTeaser(heroItem, true); }
-
         async function showItemDetails(item) {
-            if(!item) return;
+            speak(item.title);
             const GENRES = {28:"Action",12:"Aventure",16:"Animation",35:"Comédie",80:"Crime",99:"Docu",18:"Drame",10751:"Famille",14:"Fantaisie",36:"Histoire",27:"Horreur",10402:"Musique",9648:"Mystère",10749:"Romance",878:"SF",10770:"Téléfilm",53:"Thriller",10752:"Guerre",37:"Western"};
-            
             document.getElementById('iHero').style.backgroundImage = `url(${item.backdrop})`;
             document.getElementById('iTitle').innerText = item.title;
             document.getElementById('iDesc').innerText = item.overview;
             document.getElementById('iGenres').innerText = item.genreIds.map(id => GENRES[id] || "Premium").join(', ');
             document.getElementById('iPlayBtn').onclick = () => openPlayer(item);
-            
-            const castBox = document.getElementById('iCast');
-            const dirBox = document.getElementById('iDirector');
-            castBox.innerHTML = 'Chargement...'; dirBox.innerText = '...';
-            
-            try {
+            const castBox = document.getElementById('iCast'); const dirBox = document.getElementById('iDirector');
+            castBox.innerHTML = '...'; try {
                 const cred = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/credits?api_key=${TMDB_KEY}`).then(r=>r.json());
                 if(cred) {
                     castBox.innerHTML = cred.cast.slice(0, 6).map(c => `<div class="actor-pill">${c.name}</div>`).join('');
@@ -434,46 +407,40 @@
                     if(staff) dirBox.innerText = staff.name;
                 }
             } catch(e){}
-
-            const m = document.getElementById('iModal');
-            m.style.display = 'flex'; setTimeout(() => m.classList.add('active'), 50);
+            const m = document.getElementById('iModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('active'), 50);
         }
 
         function openPlayer(item) {
-            if(!item) return; activeItem = item;
-            if(ytPlayer) ytPlayer.pauseVideo();
-            const modal = document.getElementById('pModal');
-            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 50);
+            if(!item) return; activeItem = item; if(ytPlayer) ytPlayer.pauseVideo();
+            const m = document.getElementById('pModal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('active'), 50);
             renderServers(); reclaimPlayer();
         }
 
         function renderServers() {
             const grid = document.getElementById('svButtons'); grid.innerHTML = '';
             SERVERS.forEach(s => {
-                const b = document.createElement('button');
-                b.className = `s-btn ${s.id === activeServerId ? 'active' : ''}`; b.innerText = s.name;
+                const b = document.createElement('button'); b.className = `s-btn ${s.id === activeServerId ? 'active' : ''}`; b.innerText = s.name;
                 b.onclick = () => { activeServerId = s.id; renderServers(); reclaimPlayer(); };
                 grid.appendChild(b);
             });
         }
 
-        function reclaimPlayer() {
-            const wrap = document.getElementById('playerWrapper');
-            const server = SERVERS.find(s => s.id === activeServerId);
-            wrap.innerHTML = `<iframe src="${server.url(activeItem)}" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
-        }
-
-        function closePlayer() { closeModal('pModal'); if(ytPlayer) ytPlayer.playVideo(); }
+        function reclaimPlayer() { document.getElementById('playerWrapper').innerHTML = `<iframe src="${SERVERS.find(s => s.id === activeServerId).url(activeItem)}" allowfullscreen></iframe>`; }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); setTimeout(()=>document.getElementById(id).style.display='none', 400); }
+        function closePlayer() { closeModal('pModal'); if(ytPlayer) ytPlayer.playVideo(); }
+        function toggleHeroSound() {
+            pMuted = !pMuted; const btn = document.getElementById('muteBtn'); const icon = document.getElementById('volIcon');
+            if(pMuted) { ytPlayer.mute(); btn.classList.remove('active-sound'); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>'; }
+            else { ytPlayer.unMute(); btn.classList.add('active-sound'); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>'; }
+        }
 
         function setupSearch() {
             document.getElementById('masterSearch').oninput = (e) => {
                 const q = e.target.value.toLowerCase();
                 if(q.length < 2) { if(currentView === 'home') renderDashboard(); return; }
-                const filtered = mainCatalog.filter(i => i.title.toLowerCase().includes(q));
                 const grid = document.getElementById('dynamicRows');
                 grid.innerHTML = `<h2 class="row-title" style="margin-top:100px">RÉSULTATS:</h2><div class="grid-view" id="searchArea"></div>`;
-                filtered.forEach(i => document.getElementById('searchArea').appendChild(createCard(i)));
+                mainCatalog.filter(i => i.title.toLowerCase().includes(q)).forEach(i => document.getElementById('searchArea').appendChild(createCard(i)));
             };
         }
     </script>
