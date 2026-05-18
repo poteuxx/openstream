@@ -202,34 +202,29 @@
         }
         /* DASHBOARD SUPREMACY (ACCEUIL) */
         .welcome-panel {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.08), rgba(157, 80, 187, 0.08));
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.12), rgba(157, 80, 187, 0.12));
             border: 1px solid var(--glass-border);
             border-radius: 30px;
-            padding: 80px 60px;
-            margin-bottom: 60px;
+            padding: 60px 50px;
+            margin-bottom: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
             gap: 30px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 50px rgba(0, 242, 255, 0.1);
+            backdrop-filter: blur(25px);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 40px rgba(0, 242, 255, 0.05);
             position: relative;
             overflow: hidden;
+            z-index: 50;
         }
-        .welcome-panel::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.1), transparent 50%);
-        }
-        .w-text h2 { font-size: 4rem; font-weight: 950; margin-bottom: 15px; color: var(--accent); letter-spacing: -2px; }
-        .w-text p { color: var(--text-muted); font-size: 1.3rem; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-        .w-stats { display: flex; gap: 30px; margin-top: 20px; }
-        .stat-card { background: rgba(0,0,0,0.5); padding: 25px 40px; border-radius: 20px; border: 1px solid var(--glass-border); text-align: center; min-width: 180px; transition: 0.3s; }
-        .stat-card:hover { transform: translateY(-10px); border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
-        .stat-val { display: block; font-size: 2.2rem; font-weight: 950; color: white; }
-        .stat-lab { font-size: 0.85rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+        .w-text h2 { font-size: 3.5rem; font-weight: 950; margin-bottom: 12px; color: var(--accent); letter-spacing: -2px; text-shadow: 0 0 30px rgba(0, 242, 255, 0.4); }
+        .w-text p { color: rgba(255,255,255,0.8); font-size: 1.2rem; line-height: 1.6; max-width: 850px; margin: 0 auto; }
+        .w-stats { display: flex; gap: 30px; margin-top: 10px; }
+        .stat-card { background: rgba(0,0,0,0.6); padding: 20px 35px; border-radius: 20px; border: 1px solid var(--glass-border); text-align: center; min-width: 170px; transition: 0.4s var(--transition); }
+        .stat-card:hover { transform: translateY(-10px); border-color: var(--accent); background: rgba(0, 242, 255, 0.08); box-shadow: 0 0 30px rgba(0, 242, 255, 0.1); }
+        .stat-val { display: block; font-size: 2rem; font-weight: 950; color: white; }
+        .stat-lab { font-size: 0.8rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
 
         /* GRID SYSTEM (FILMS/SERIES) */
         .grid-view {
@@ -366,7 +361,7 @@
         .side-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
         .side-rank { font-size: 0.75rem; color: var(--accent); font-weight: 900; }
 
-        .container { padding: 40px; margin-top: 140px; position: relative; z-index: 10; max-width: 1800px; margin-left: auto; margin-right: auto; }
+        .container { padding: 40px; margin-top: -180px; position: relative; z-index: 10; max-width: 1800px; margin-left: auto; margin-right: auto; }
 
         .row-section { margin-bottom: 50px; position: relative; }
         .row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
