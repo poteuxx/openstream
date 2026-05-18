@@ -84,12 +84,12 @@
         .m-close { position: absolute; top: 30px; right: 30px; width: 45px; height: 45px; background: rgba(0,0,0,0.6); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: 0.3s; }
         .m-close:hover { background: #ff4757; transform: rotate(90deg); }
 
-        .i-hero { width: 100%; height: 550px; background-size: cover; background-position: center; position: relative; }
+        .i-hero { width: 100%; height: 380px; background-size: cover; background-position: center; position: relative; }
         .i-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, #080a12 0%, transparent 70%); }
-        .i-body { padding: 50px 80px; display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 70px; }
-        .i-main h2 { font-size: 3.5rem; font-weight: 950; margin-bottom: 30px; letter-spacing: -2px; }
-        .i-desc { font-size: 1.2rem; color: #cbd5e1; line-height: 1.8; margin-bottom: 40px; }
-        .tag-row { display: flex; flex-direction: column; gap: 25px; }
+        .i-body { padding: 30px 60px; display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 50px; }
+        .i-main h2 { font-size: 2.8rem; font-weight: 950; margin-bottom: 20px; letter-spacing: -2px; }
+        .i-desc { font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+        .tag-row { display: flex; flex-direction: column; gap: 20px; }
         .tag-info { font-size: 1rem; color: #64748b; line-height: 1.5; }
         .tag-info span { color: #f1f5f9; font-weight: 600; display: block; margin-top: 8px; }
         .actor-pill { background: rgba(255,255,255,0.06); padding: 5px 15px; border-radius: 8px; font-size: 0.85rem; color: #fff; border: 1px solid rgba(255,255,255,0.1); margin: 5px; display: inline-block; }
@@ -117,6 +117,7 @@
             <a class="nav-link" onclick="switchView('movie')">FILMS</a>
             <a class="nav-link" onclick="switchView('tv')">SÉRIES</a>
             <a class="nav-link" onclick="switchView('docu')">DOCUS</a>
+            <a class="nav-link" onclick="switchView('about')">À PROPOS</a>
         </nav>
         <div class="search-shell">
             <input type="text" id="masterSearch" placeholder="Rechercher un titre...">
@@ -301,10 +302,36 @@
             const grid = document.getElementById('dynamicRows');
             grid.innerHTML = '';
             
-            // Hero is GLOBAL and ALWAYS VISIBLE
             if(view === 'home') { renderDashboard(); }
+            else if(view === 'about') { renderAbout(); }
             else { renderGrid(view); }
             window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function renderAbout() {
+            document.getElementById('dynamicRows').innerHTML = `
+                <div class="welcome-panel" style="text-align:left; align-items:flex-start; max-width:1000px; margin: 100px auto;">
+                    <h2 style="margin-bottom:30px">À Propos d'OpenStream PRO</h2>
+                    <p style="font-size:1.2rem; line-height:1.8; color:#cbd5e1; margin-bottom:40px">
+                        <b>OpenStream PRO</b> est une interface de divertissement de nouvelle génération, conçue par <b>Solutions Technologies</b>. 
+                        Notre mission est de centraliser l'accès à la culture cinématographique mondiale via une architecture 100% automatisée et haute performance.
+                    </p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px">
+                        <div>
+                            <h3 style="color:var(--accent); margin-bottom:15px">TECHNOLOGIE</h3>
+                            <p style="color:#94a3b8; font-size:0.9rem">
+                                Alimenté par l'API TMDB, notre moteur synchronise en temps réel des milliers de titres, bandes-annonces et métadonnées pour offrir une expérience sans latence.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--accent); margin-bottom:15px">ENGAGEMENT</h3>
+                            <p style="color:#94a3b8; font-size:0.9rem">
+                                Nous nous efforçons de fournir l'interface la plus propre et la plus immersive du marché, sans publicité intrusive et avec une failover-grid de 24 serveurs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         function renderDashboard() {
