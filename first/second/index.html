@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OX Dashboard — Personal Hub</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-main: #05070a;
+            --bg-card: #0c0f17;
+            --accent: #00d9ff;
+            --accent-purple: #8b5cf6;
+            --text-main: #ffffff;
+            --text-muted: #8b95b7;
+            --border: rgba(255,255,255,0.08);
+            --glass: blur(15px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-main); 
+            overflow: hidden; 
+            display: flex; 
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        aside {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 900;
+            font-size: 1.4rem;
+            margin-bottom: 50px;
+        }
+        .logo-box {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        nav { display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
+        .nav-item {
+            padding: 12px 15px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .nav-item:hover, .nav-item.active { 
+            color: white; 
+            background: rgba(255,255,255,0.05); 
+        }
+        .nav-item.active { border-left: 3px solid var(--accent); }
+
+        .user-info {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+        }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent); }
+
+        /* MAIN CONTENT */
+        main {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .welcome h2 { font-size: 2rem; font-weight: 800; margin-bottom: 5px; }
+        .welcome p { color: var(--text-muted); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .stat-val { display: block; font-size: 1.8rem; font-weight: 800; margin-bottom: 5px; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .grid-sections {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .section-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 25px;
+        }
+        .section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; display: flex; justify-content: space-between; }
+
+        /* LISTS */
+        .history-list { display: flex; flex-direction: column; gap: 15px; }
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            border-radius: 15px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .history-item:hover { background: rgba(255,255,255,0.03); }
+        .item-thumb { width: 100px; height: 60px; border-radius: 10px; object-fit: cover; }
+        .item-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .item-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+        .progress-bar { width: 100%; height: 4px; background: #222; border-radius: 2px; margin-top: 8px; position: relative; }
+        .progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 2px; }
+
+        /* QUICK SETTINGS */
+        .settings-list { display: flex; flex-direction: column; gap: 15px; }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .toggle {
+            width: 45px;
+            height: 24px;
+            background: #333;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .toggle.active { background: var(--accent); }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        .toggle.active::after { left: 24px; }
+
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate { animation: fadeIn 0.5s ease-out forwards; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="logo">
+            <div class="logo-box">OX</div>
+            <span>OpenStream X</span>
+        </div>
+
+        <nav>
+            <a href="index.html" class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Accueil
+            </a>
+            <a class="nav-item active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Tableau de bord
+            </a>
+            <a class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                Favoris
+            </a>
+            <a class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                Statistiques
+            </a>
+            <a class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Paramètres
+            </a>
+        </nav>
+
+        <div class="user-info">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="avatar" alt="User">
+            <div>
+                <div style="font-weight: 800; font-size: 0.9rem;">Felix André</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Premium Member</div>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <div class="header">
+            <div class="welcome animate">
+                <h2 id="welcomeText">Bonjour, Felix !</h2>
+                <p>Voici ce qui se passe sur votre OX Hub aujourd'hui.</p>
+            </div>
+            <div class="header-actions">
+                <!-- Search or notifications could go here -->
+            </div>
+        </div>
+
+        <div class="stats-grid animate">
+            <div class="stat-card">
+                <span class="stat-val">124</span>
+                <span class="stat-label">Titres regardés</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val">2.5k</span>
+                <span class="stat-label">Minutes streamées</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val">12</span>
+                <span class="stat-label">Séries en cours</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val">48</span>
+                <span class="stat-label">Favoris</span>
+            </div>
+        </div>
+
+        <div class="grid-sections">
+            
+            <div class="section-box animate" style="animation-delay: 0.2s;">
+                <div class="section-title">
+                    Reprendre la lecture
+                    <span style="color: var(--accent); font-size: 0.8rem; cursor: pointer;">Voir tout</span>
+                </div>
+                <div class="history-list" id="historyContainer">
+                    <!-- Dynamic -->
+                </div>
+            </div>
+
+            <div class="section-box animate" style="animation-delay: 0.4s;">
+                <div class="section-title">Paramètres Rapides</div>
+                <div class="settings-list">
+                    <div class="setting-item">
+                        <div>
+                            <div style="font-weight: 700;">Mode Nuit</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Interface sombre futuriste</div>
+                        </div>
+                        <div class="toggle active"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div style="font-weight: 700;">Autoplay Trailers</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Lecture auto en fond</div>
+                        </div>
+                        <div class="toggle active"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div style="font-weight: 700;">Haute Qualité (4K)</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Forcer le flux maximal</div>
+                        </div>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div style="font-weight: 700;">Notifications</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Nouveautés et sorties</div>
+                        </div>
+                        <div class="toggle active"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">STOCKAGE CACHE</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+                        <span>Utilisé: 2.1 GB</span>
+                        <span>Total: 5.0 GB</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 42%;"></div>
+                    </div>
+                    <button style="width: 100%; margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; border-radius: 10px; cursor: pointer; font-weight: 700;">Vider le Cache</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.toggle').forEach(t => {
+            t.onclick = () => t.classList.toggle('active');
+        });
+
+        const history = [
+            { title: 'The Matrix Resurrections', progress: 75, thumb: 'https://image.tmdb.org/t/p/w500/8c96s6Oli069ihS696vo39YpDsy.jpg', time: '1h 45m left' },
+            { title: 'Arcane', progress: 40, thumb: 'https://image.tmdb.org/t/p/w500/rc96s6Oli069ihS696vo39YpDsy.jpg', time: 'S1 E4 - 22m' },
+            { title: 'Dune: Part Two', progress: 95, thumb: 'https://image.tmdb.org/t/p/w500/8c96s6Oli069ihS696vo39YpDsy.jpg', time: '5m left' },
+            { title: 'Breaking Bad', progress: 20, thumb: 'https://image.tmdb.org/t/p/w500/rc96s6Oli069ihS696vo39YpDsy.jpg', time: 'S2 E1 - 40m' }
+        ];
+
+        const container = document.getElementById('historyContainer');
+        history.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'history-item';
+            el.innerHTML = `
+                <img src="${item.thumb}" class="item-thumb" alt="">
+                <div style="flex-grow: 1;">
+                    <div class="item-info">
+                        <h4>${item.title}</h4>
+                        <p>${item.time}</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${item.progress}%;"></div>
+                    </div>
+                </div>
+                <div style="padding: 10px; color: var(--accent);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            `;
+            container.appendChild(el);
+        });
+
+        // Language toggle logic integration
+        let currentLang = localStorage.getItem('ox_lang') || 'fr';
+        function updateLang() {
+            if(currentLang === 'en') {
+                document.getElementById('welcomeText').innerText = "Hello, Felix!";
+                // ... other translations
+            }
+        }
+        updateLang();
+    </script>
+</body>
+</html>

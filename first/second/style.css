@@ -1,0 +1,65 @@
+/* 
+   OX OpenStream - Global Design Tokens 
+   Production-ready premium variables for futuristic UI/UX 
+*/
+
+:root {
+    /* Colors */
+    --ox-bg: #05070a;
+    --ox-surface: #0c0f17;
+    --ox-accent: #00d9ff;
+    --ox-purple: #8b5cf6;
+    --ox-pink: #ff3cac;
+    --ox-text: #ffffff;
+    --ox-muted: #8b95b7;
+    
+    /* Effects */
+    --ox-glass: rgba(15, 20, 35, 0.7);
+    --ox-border: rgba(255, 255, 255, 0.08);
+    --ox-glow: 0 0 20px rgba(0, 217, 255, 0.3);
+    --ox-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    
+    /* Animations */
+    --ox-curve: cubic-bezier(0.4, 0, 0.2, 1);
+    --ox-duration: 0.4s;
+}
+
+/* Base Styles */
+.ox-button {
+    background: linear-gradient(135deg, var(--ox-accent), var(--ox-purple));
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--ox-duration) var(--ox-curve);
+    box-shadow: var(--ox-glow);
+}
+
+.ox-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 25px rgba(0, 217, 255, 0.5);
+}
+
+.ox-card {
+    background: var(--ox-surface);
+    border: 1px solid var(--ox-border);
+    border-radius: 20px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.ox-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--ox-border);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: 0.3s;
+}
+
+.ox-input:focus {
+    border-color: var(--ox-accent);
+    box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+}
