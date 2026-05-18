@@ -1,20 +1,126 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenStream Small</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenStream X</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<header>
-  <div class="logo">OpenStream Small</div>
-  <input id="search" placeholder="Search movies">
-</header>
+    <canvas id="particles"></canvas>
 
-<div id="content"></div>
+    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
+    <div class="background-glow glow-3"></div>
 
-<script src="app.js"></script>
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">OX</div>
+            <div>
+                <div class="logo">OpenStream X</div>
+                <div class="logo-subtitle">Future Streaming Experience</div>
+            </div>
+        </div>
+
+        <nav>
+            <button class="nav-btn active">Home</button>
+            <button class="nav-btn">Movies</button>
+            <button class="nav-btn">Series</button>
+            <button class="nav-btn">Trending</button>
+        </nav>
+
+        <div class="header-right">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 21L15.8 15.8M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input id="search" type="text" placeholder="Search movies, series, anime...">
+            </div>
+
+            <button class="profile-btn">
+                <span>Guest</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <div class="hero-tag">#1 FUTURISTIC STREAMING EXPERIENCE</div>
+
+                <h1>Unlimited Entertainment In One Place</h1>
+
+                <p>
+                    Discover movies, anime, documentaries and premium content with a futuristic immersive interface powered by modern web technologies.
+                </p>
+
+                <div class="hero-buttons">
+                    <button class="primary-btn">▶ Start Watching</button>
+                    <button class="secondary-btn">＋ My List</button>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <span class="stat-number">4K+</span>
+                        <span class="stat-label">Movies</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-number">120+</span>
+                        <span class="stat-label">Series</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Streaming</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="floating-card floating-card-1"></div>
+                <div class="floating-card floating-card-2"></div>
+                <div class="floating-card floating-card-3"></div>
+            </div>
+        </section>
+
+        <section class="top-categories">
+            <div class="category-card cyber">
+                <h3>Cyberpunk</h3>
+                <span>Neon future worlds</span>
+            </div>
+
+            <div class="category-card anime">
+                <h3>Anime</h3>
+                <span>Japanese animation</span>
+            </div>
+
+            <div class="category-card sci-fi">
+                <h3>Sci‑Fi</h3>
+                <span>Advanced technology</span>
+            </div>
+
+            <div class="category-card action">
+                <h3>Action</h3>
+                <span>Explosive adventures</span>
+            </div>
+        </section>
+
+        <div id="content"></div>
+
+    </main>
+
+    <script src="app.js"></script>
 </body>
 </html>
+```
