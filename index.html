@@ -47,9 +47,14 @@
         @keyframes logoGradiant { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
         @keyframes shimmer { 0% { transform: translate(-30%, -30%) rotate(0deg); } 100% { transform: translate(30%, 30%) rotate(0deg); } }
 
-        nav { display: flex; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 14px; border: 1px solid var(--glass-border); }
-        .nav-link { padding: 8px 18px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.8rem; transition: 0.3s; cursor: pointer; }
-        .nav-link.active { color: white; background: linear-gradient(90deg, #00f2ff, #0072ff); box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
+        nav { position: relative; display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 14px; border: 1px solid var(--glass-border); }
+        .nav-link { position: relative; z-index: 2; padding: 8px 18px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.8rem; transition: 0.3s; cursor: pointer; }
+        .nav-link.active { color: white; }
+        .nav-pill { position: absolute; height: calc(100% - 10px); background: linear-gradient(90deg, #00f2ff, #0072ff); border-radius: 10px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; top: 5px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); pointer-events: none; }
+
+        .hist-nav { display: flex; gap: 5px; margin-right: 15px; }
+        .h-btn { width: 35px; height: 35px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .h-btn:hover { background: var(--accent); color: black; border-color: var(--accent); }
 
         .search-shell { position: relative; display: flex; align-items: center; justify-content: flex-end; width: 45px; height: 45px; transition: 0.6s var(--transition); overflow: hidden; background: rgba(255,255,255,0.05); border-radius: 25px; border: 1px solid var(--glass-border); cursor: pointer; }
         .search-shell:hover, .search-shell:focus-within { width: 320px; background: rgba(0,0,0,0.6); border-color: var(--accent); cursor: text; }
@@ -122,21 +127,58 @@
         .btn-main { padding: 18px 40px; border-radius: 15px; font-weight: 950; cursor: pointer; border: none; transition: 0.4s; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 15px; font-size: 1rem; }
         .btn-primary { background: linear-gradient(90deg, #00f2ff, #0072ff); color: white; box-shadow: 0 0 20px rgba(0, 217, 255, 0.4); }
         .btn-sec { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); }
+        /* SPLASH & ASSISTANT */
+        #splash { position: fixed; inset: 0; z-index: 99999; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s; }
+        .s-loader { width: 80px; height: 80px; border: 4px solid var(--glass-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #nova { position: fixed; bottom: 40px; left: 40px; z-index: 9000; display: none; align-items: center; gap: 20px; animation: slideUp 0.6s var(--transition); }
+        .nova-avatar { width: 65px; height: 65px; background: var(--accent); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 30px var(--accent-glow); display: flex; align-items: center; justify-content: center; font-weight: 950; font-size: 1.5rem; color: black; }
+        .nova-bubble { background: white; color: #0f172a; padding: 20px 25px; border-radius: 20px 20px 20px 0; max-width: 320px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .nova-bubble h4 { font-size: 0.9rem; margin-bottom: 8px; color: var(--accent-purple); letter-spacing: 1px; }
+        .nova-bubble p { font-size: 0.85rem; line-height: 1.5; font-weight: 500; }
+        .nova-close { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #94a3b8; font-weight: 900; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .welcome-panel { background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.15), transparent), linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(8, 12, 18, 0.98)); border: 1px solid var(--glass-border); border-radius: 35px; padding: 100px 60px; margin-bottom: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; overflow: hidden; position: relative; }
+        .welcome-panel::before { content: ''; position: absolute; top:0; left:0; width:100%; height:4px; background:linear-gradient(90deg, transparent, var(--accent), transparent); animation: scan 3s infinite; }
+        @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .welcome-panel h2 { font-size: 4.5rem; font-weight: 950; color: white; line-height: 1; margin-bottom: 5px; }
+        .welcome-panel p { color: var(--accent); font-weight: 800; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 5px; }
     </style>
 </head>
 <body>
 
+    <div id="splash">
+        <div class="s-loader"></div>
+        <div class="logo-text"><h1>OPEN <b>STREAM</b></h1></div>
+    </div>
+
+    <div id="nova">
+        <div class="nova-avatar">N</div>
+        <div class="nova-bubble" id="novaBubble">
+            <span class="nova-close" onclick="closeNova()">×</span>
+            <h4 id="novaTitle">ASSISTANT NOVA</h4>
+            <p id="novaText">Bienvenue! Je suis Nova. Je vais vous guider à travers l'interface OpenStream PRO.</p>
+        </div>
+    </div>
+
     <header id="mainHeader">
+        <div class="hist-nav">
+            <button class="h-btn" onclick="history.back()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg></button>
+            <button class="h-btn" onclick="history.forward()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"></path></svg></button>
+        </div>
         <div class="logo" onclick="location.reload()">
             <div class="logo-badge">OS</div>
             <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span id="logoBrand">SOLUTIONS TECHNOLOGIES</span></div>
         </div>
-        <nav>
-            <a class="nav-link active" id="navHome" onclick="switchView('home')">ACCUEIL</a>
-            <a class="nav-link" id="navFilms" onclick="switchView('movie')">FILMS</a>
-            <a class="nav-link" id="navSeries" onclick="switchView('tv')">SÉRIES</a>
-            <a class="nav-link" id="navDocus" onclick="switchView('docu')">DOCUS</a>
-            <a class="nav-link" id="navAbout" onclick="switchView('about')">À PROPOS</a>
+        <nav id="topNav">
+            <div class="nav-pill" id="navPill"></div>
+            <a class="nav-link active" id="navHome" onmouseenter="navHover('home')" onclick="switchView('home')">ACCUEIL</a>
+            <a class="nav-link" id="navFilms" onmouseenter="navHover('movie')" onclick="switchView('movie')">FILMS</a>
+            <a class="nav-link" id="navSeries" onmouseenter="navHover('tv')" onclick="switchView('tv')">SÉRIES</a>
+            <a class="nav-link" id="navDocus" onmouseenter="navHover('docu')" onclick="switchView('docu')">DOCUS</a>
+            <a class="nav-link" id="navAbout" onmouseenter="navHover('about')" onclick="switchView('about')">À PROPOS</a>
         </nav>
         <div style="display:flex; align-items:center;">
             <div class="search-shell">
@@ -262,13 +304,57 @@
             { id: 's24', name: 'INDUSTRIE 24', url: i => `https://vidsrc.icu/embed/${i.type==='tv'?'tv':'movie'}/${i.tmdbId}` }
         ];
 
+        let hoverTimer = null;
+
         window.onload = async () => {
             loadYTAPI();
             await syncCatalog();
             setupSearch();
             switchView('home');
             updateUI();
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => document.getElementById('splash').remove(), 1000);
+                startTutorial();
+            }, 3000); // Cinematic Delay
         };
+
+        function navHover(view) {
+            clearTimeout(hoverTimer);
+            const target = document.querySelector(`.nav-link[onclick*="'${view}'"]`);
+            movePill(target);
+            hoverTimer = setTimeout(() => switchView(view), 400); // 400ms Delay Selection
+        }
+
+        function movePill(el) {
+            const pill = document.getElementById('navPill');
+            if(!el || !pill) return;
+            pill.style.left = el.offsetLeft + 'px';
+            pill.style.width = el.offsetWidth + 'px';
+        }
+
+        const TUTORIAL = [
+            { t: 'CONTRÔLE TOTAL', p: 'Utilisez les flèches de navigation en haut à gauche pour naviguer dans votre historique.' },
+            { t: 'CINÉMA HEROÏQUE', p: 'Survolez les films pour mettre à jour la bande-annonce en arrière-plan en temps réel.' },
+            { t: 'LOCALISATION', p: 'Utilisez le bouton FR/EN pour une interface et des métadonnées 100% bilingues.' },
+            { t: 'PRÊT?', p: 'Profitez de la meilleure expérience de streaming automatisée.' }
+        ];
+        let tutIdx = 0;
+
+        function startTutorial() {
+            const n = document.getElementById('nova');
+            n.style.display = 'flex';
+            nextTut();
+        }
+        function nextTut() {
+            if(tutIdx >= TUTORIAL.length) return closeNova();
+            const step = TUTORIAL[tutIdx];
+            document.getElementById('novaTitle').innerText = step.t;
+            document.getElementById('novaText').innerText = step.p;
+            tutIdx++;
+            setTimeout(nextTut, 5000);
+        }
+        function closeNova() { document.getElementById('nova').style.display = 'none'; }
 
         function loadYTAPI() {
             window.onYouTubeIframeAPIReady = () => {
@@ -360,9 +446,13 @@
 
         function switchView(view) {
             currentView = view;
-            document.querySelectorAll('.nav-link').forEach(l => {
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(l => {
                 l.classList.remove('active');
-                if(l.getAttribute('onclick').includes(`'${view}'`)) l.classList.add('active');
+                if(l.getAttribute('onclick').includes(`'${view}'`)) {
+                    l.classList.add('active');
+                    movePill(l);
+                }
             });
             const grid = document.getElementById('dynamicRows');
             grid.innerHTML = '';
