@@ -219,7 +219,26 @@
         .hero-h1 { font-size: 4rem; font-weight: 900; line-height: 0.95; margin-bottom: 20px; text-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .hero-p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 35px; max-width: 600px; }
 
-        .btn-flex { display: flex; gap: 15px; }
+        .hero-btn-group { display: flex; gap: 18px; margin-top: 10px; }
+        
+        .mute-toggle {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: 0.3s;
+        }
+        .mute-toggle:hover { background: var(--accent); color: black; border-color: var(--accent); }
         .btn-main {
             padding: 14px 28px;
             border-radius: 14px;
@@ -488,17 +507,21 @@
             <h1 class="hero-h1" id="hTitle">Chargement...</h1>
             <p class="hero-p" id="hDesc">Exploration des archives galactiques en cours. Préparez votre visionnage haute définition.</p>
             
-            <div class="btn-flex">
-                <button class="btn-main btn-primary" id="hPlay">
+            <div class="hero-btn-group">
+                <button class="btn-main btn-primary" id="hPlay" onclick="playHero()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     LECTURE
                 </button>
-                <button class="btn-main btn-sec" id="hInfos">
+                <button class="btn-main btn-sec" id="hInfos" onclick="infoHero()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     DÉTAILS
                 </button>
             </div>
         </div>
+
+        <button class="mute-toggle" id="muteBtn" onclick="toggleHeroSound()">
+            <svg id="volIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
     </section>
 
     <div class="container">
@@ -572,6 +595,7 @@
 
         window.onload = async () => {
             initParticles();
+            loadYTAPI();
             await syncCatalog();
             setupSearch();
             window.onscroll = () => {
@@ -580,6 +604,12 @@
                 else h.classList.remove('scrolled');
             };
         };
+
+        function loadYTAPI() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
+        }
 
         /* ----------------------------------------------------
            DATA SYNC
@@ -767,32 +797,60 @@
         }
 
         function setHero(item) {
+            activeHeroItem = item; // Store globally for buttons
             document.getElementById('hBg').style.backgroundImage = `url(${item.backdrop})`;
             document.getElementById('hTitle').innerText = item.title;
             document.getElementById('hDesc').innerText = item.overview.slice(0, 200) + '...';
             document.getElementById('hContent').classList.add('active');
-            document.getElementById('hPlay').onclick = () => openPlayer(item);
             loadHeroTrailer(item);
         }
 
+        let activeHeroItem = null;
+        let ytPlayer = null;
+        let isMuted = true;
+
+        function playHero() { if(activeHeroItem) openPlayer(activeHeroItem); }
+        function infoHero() { if(activeHeroItem) showItemDetails(activeHeroItem); }
+
         async function loadHeroTrailer(item) {
             const box = document.getElementById('heroTrailer');
-            box.innerHTML = ''; box.style.opacity = '0';
+            box.innerHTML = '<div id="ytPlaceholder"></div>'; 
+            box.style.opacity = '0';
+            
             try {
                 const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.id}/videos?api_key=${TMDB_KEY}`).then(r => r.json());
                 const tr = res.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-                if(tr) {
+                
+                if(tr && window.YT) {
                     setTimeout(() => {
-                        box.innerHTML = `<iframe src="https://www.youtube.com/embed/${tr.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${tr.key}"></iframe>`;
-                        box.style.opacity = '0.5';
+                        ytPlayer = new YT.Player('ytPlaceholder', {
+                            videoId: tr.key,
+                            playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 'playlist': tr.key, 'modestbranding': 1 },
+                            events: {
+                                'onReady': (e) => { 
+                                    box.style.opacity = '0.5'; 
+                                    if(!isMuted) e.target.unMute();
+                                }
+                            }
+                        });
                     }, 4000);
                 }
             } catch(e){}
         }
 
-        /* ----------------------------------------------------
-           CANVAS PARTICLES
-        ---------------------------------------------------- */
+        function toggleHeroSound() {
+            if(!ytPlayer) return;
+            isMuted = !isMuted;
+            const icon = document.getElementById('volIcon');
+            if(isMuted) {
+                ytPlayer.mute();
+                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+            } else {
+                ytPlayer.unMute();
+                icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+            }
+        }
+
         function initParticles() {
             const c = document.getElementById('particles');
             const ctx = c.getContext('2d');
