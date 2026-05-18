@@ -128,19 +128,27 @@
         .btn-main { padding: 18px 40px; border-radius: 15px; font-weight: 950; cursor: pointer; border: none; transition: 0.4s; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 15px; font-size: 1rem; }
         .btn-primary { background: linear-gradient(90deg, #00f2ff, #0072ff); color: white; box-shadow: 0 0 20px rgba(0, 217, 255, 0.4); }
         .btn-sec { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); }
+        
         /* SPLASH & ASSISTANT */
-        #splash { position: fixed; inset: 0; z-index: 99999; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s; }
-        .s-loader { width: 80px; height: 80px; border: 4px solid var(--glass-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        #splash { position: fixed; inset: 0; z-index: 99999; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .s-loader-shell { width: 300px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin: 30px 0; }
+        #s-progress { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #0072ff); transition: 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #s-tag { color: var(--accent); font-size: 0.7rem; font-weight: 950; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px; opacity: 0.8; min-height: 20px; }
 
         #nova { position: fixed; bottom: 40px; left: 40px; z-index: 9000; display: none; align-items: center; gap: 20px; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(30px); }
         #nova.active { display: flex; opacity: 1; transform: translateY(0); }
         #nova.closing { opacity: 0; transform: translateY(50px) scale(0.9); }
-        .nova-bubble { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(30px); color: white; padding: 20px 25px; border-radius: 20px 20px 20px 0; max-width: 320px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
-        .nova-bubble h4 { font-size: 0.9rem; margin-bottom: 8px; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; }
-        .nova-bubble p { font-size: 0.85rem; line-height: 1.5; color: #e2e8f0; }
-        .nova-close { position: absolute; top: 10px; right: 10px; cursor: pointer; color: rgba(255,255,255,0.4); font-weight: 500; font-size: 1.2rem; }
-        .nova-close:hover { color: var(--accent); }
+        
+        .nova-bubble { background: rgba(10, 15, 26, 0.7); backdrop-filter: blur(40px); color: white; padding: 25px 30px; border-radius: 25px 25px 25px 0; max-width: 350px; position: relative; box-shadow: 0 25px 60px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); }
+        .nova-bubble h4 { font-size: 0.9rem; margin-bottom: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid rgba(0,242,255,0.2); padding-bottom: 8px; display: inline-block; }
+        .nova-bubble p { font-size: 0.9rem; line-height: 1.6; color: #f1f5f9; font-weight: 500; }
+        .nova-close { position: absolute; top: 15px; right: 15px; cursor: pointer; color: rgba(255,255,255,0.3); transition: 0.3s; }
+        .nova-close:hover { color: #ff4757; }
+        
+        #dynamicRows { transition: 0.6s var(--transition); width: 100%; }
+        .view-transition { animation: viewIn 0.8s var(--transition) forwards; }
+        @keyframes viewIn { from { opacity: 0; transform: translateY(30px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+nt); }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .welcome-panel { background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.15), transparent), linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(8, 12, 18, 0.98)); border: 1px solid var(--glass-border); border-radius: 35px; padding: 100px 60px; margin-bottom: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; overflow: hidden; position: relative; }
@@ -153,8 +161,10 @@
 <body>
 
     <div id="splash">
-        <div class="s-loader"></div>
-        <div class="logo-text"><h1>OPEN <b>STREAM</b></h1></div>
+        <div class="logo-badge" style="width:100px; height:100px; font-size:2.5rem; margin-bottom:30px;">OS</div>
+        <div class="logo-text" style="text-align:center;"><h1>OPEN <b>STREAM</b></h1></div>
+        <div class="s-loader-shell"><div id="s-progress"></div></div>
+        <div id="s-tag">Initializing Core Systems...</div>
     </div>
 
     <div id="nova">
@@ -313,17 +323,27 @@
 
         let hoverTimer = null;
 
+        function updateSplash(p, text) {
+            document.getElementById('s-progress').style.width = p + '%';
+            document.getElementById('s-tag').innerText = text;
+        }
+
         window.onload = async () => {
+            updateSplash(10, "Initializing YT Engine...");
             loadYTAPI();
+            updateSplash(30, "Syncing Global Catalog...");
             await syncCatalog();
+            updateSplash(70, "configuring Search Logic...");
             setupSearch();
+            updateSplash(90, "Finalizing UI Handshake...");
             switchView('home', false);
             updateUI();
+            updateSplash(100, "Core Ready.");
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => document.getElementById('splash').remove(), 1000);
+                setTimeout(() => document.getElementById('splash').remove(), 1200);
                 startTutorial();
-            }, 3000); 
+            }, 1000); 
         };
 
         window.onpopstate = (e) => {
@@ -469,6 +489,11 @@
             currentView = view;
             if(push) history.pushState({view}, '', `#${view}`);
             
+            const grid = document.getElementById('dynamicRows');
+            grid.classList.remove('view-transition');
+            void grid.offsetWidth; // Trigger reflow
+            grid.classList.add('view-transition');
+
             const links = document.querySelectorAll('.nav-link');
             links.forEach(l => {
                 l.classList.remove('active');
@@ -477,7 +502,6 @@
                     movePill(l);
                 }
             });
-            const grid = document.getElementById('dynamicRows');
             grid.innerHTML = '';
             
             if(view === 'home') renderDashboard();
