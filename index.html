@@ -134,7 +134,10 @@
         
         /* SPLASH & ASSISTANT */
         #splash { position: fixed; inset: 0; z-index: 99999; background: radial-gradient(circle at center, #0f172a, #020617); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        .s-ring { position: absolute; width: 600px; height: 600px; border: 1px solid rgba(0, 242, 255, 0.05); border-radius: 50%; border-top-color: var(--accent); animation: orbit 10s linear infinite; }
+        #splash::before { content: '0X88FF 0X99AA 0XCCBB 0XFFEE 0X1234 0XABCD 0X7788'; position: absolute; top: 0; font-family: 'Courier New', Courier, monospace; color: var(--accent); opacity: 0.04; font-size: 8rem; white-space: nowrap; animation: matrixMove 30s linear infinite; pointer-events: none; }
+        @keyframes matrixMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .s-ring { position: absolute; width: 600px; height: 600px; border: 1px solid rgba(0, 242, 255, 0.05); border-radius: 50%; border-top-color: var(--accent); animation: orbit 10s linear infinite; z-index: 1; }
         @keyframes orbit { to { transform: rotate(360deg); } }
 
         .s-loader-shell { width: 400px; height: 3px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; margin: 30px 0; position: relative; }
