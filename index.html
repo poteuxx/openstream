@@ -33,10 +33,19 @@
 
         /* HEADER */
         header { position: fixed; top: 0; width: 100%; z-index: 2000; display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: var(--glass); backdrop-filter: blur(30px); border-bottom: 1px solid var(--glass-border); }
-        .logo { display: flex; align-items: center; gap: 15px; text-decoration: none; cursor: pointer; }
-        .logo-badge { width: 44px; height: 44px; background: linear-gradient(135deg, #00f2ff, #9d50bb); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; font-size: 1.2rem; box-shadow: 0 0 25px var(--accent-glow); }
-        .logo-text h1 { font-size: 1.1rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin: 0; line-height: 1; }
-        .logo-text span { font-size: 0.55rem; color: var(--accent); font-weight: 800; letter-spacing: 1px; opacity: 0.8; text-transform: uppercase; }
+        /* HOLOGRAPHIC LOGO REVOLUTION */
+        .logo { display: flex; align-items: center; gap: 20px; text-decoration: none; cursor: pointer; transition: 0.4s var(--transition); }
+        .logo:hover { transform: scale(1.03); }
+        .logo-badge { width: 50px; height: 50px; background: linear-gradient(135deg, #00f2ff, #9d50bb, #00f2ff); background-size: 200% 200%; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 950; color: white; font-size: 1.4rem; box-shadow: 0 0 35px var(--accent-glow); animation: logoPulse 4s infinite, logoGradiant 6s infinite; border: 1px solid rgba(255,255,255,0.3); position: relative; overflow: hidden; }
+        .logo-badge::after { content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%; background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%); animation: shimmer 4s infinite; }
+        
+        .logo-text h1 { font-size: 1.3rem; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; margin: 0; line-height: 1; display: flex; gap: 5px; color: #f8fafc; }
+        .logo-text h1 b { font-weight: 900; color: white; letter-spacing: 0; background: linear-gradient(90deg, #fff, var(--accent), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200%; animation: logoGradiant 4s linear infinite; }
+        .logo-text span { font-size: 0.5rem; color: var(--accent); font-weight: 900; letter-spacing: 3px; opacity: 0.9; text-transform: uppercase; margin-top: 5px; display: block; filter: drop-shadow(0 0 5px var(--accent-glow)); }
+
+        @keyframes logoPulse { 0%, 100% { box-shadow: 0 0 30px var(--accent-glow); transform: scale(1); } 50% { box-shadow: 0 0 55px var(--accent-glow); transform: scale(1.05); } }
+        @keyframes logoGradiant { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        @keyframes shimmer { 0% { transform: translate(-30%, -30%) rotate(0deg); } 100% { transform: translate(30%, 30%) rotate(0deg); } }
 
         nav { display: flex; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 14px; border: 1px solid var(--glass-border); }
         .nav-link { padding: 8px 18px; border-radius: 10px; color: var(--text-muted); text-decoration: none; font-weight: 700; font-size: 0.8rem; transition: 0.3s; cursor: pointer; }
@@ -120,7 +129,7 @@
     <header id="mainHeader">
         <div class="logo" onclick="location.reload()">
             <div class="logo-badge">OS</div>
-            <div class="logo-text"><h1>OPEN STREAM</h1><span>BY SOLUTIONS TECHNOLOGIES</span></div>
+            <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span>SOLUTIONS TECHNOLOGIES</span></div>
         </div>
         <nav>
             <a class="nav-link active" id="navHome" onclick="switchView('home')">ACCUEIL</a>
