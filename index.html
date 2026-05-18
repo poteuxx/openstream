@@ -310,9 +310,9 @@
 
         function toggleConfig() {
             currentLang = currentLang === 'FR' ? 'EN' : 'FR';
-            voiceEnabled = !voiceEnabled;
+            voiceEnabled = !voiceEnabled; 
             updateUI();
-            speak(currentLang === 'FR' ? "Système mis à jour" : "System Updated");
+            speak(currentLang === 'FR' ? "Langue Français activé" : "English Language active");
         }
 
         function updateUI() {
@@ -323,7 +323,8 @@
             document.getElementById('navDocus').innerText = l.docus;
             document.getElementById('navAbout').innerText = l.about;
             document.getElementById('masterSearch').placeholder = l.search;
-            document.getElementById('btnSys').innerText = l.config;
+            document.getElementById('btnSys').innerText = currentLang;
+            
             document.getElementById('hPlayBtn').innerText = l.play;
             document.getElementById('hInfoBtn').innerText = l.details;
         }
