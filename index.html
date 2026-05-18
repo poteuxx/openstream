@@ -214,6 +214,9 @@
             { id: 's24', name: 'INDUSTRIE 24', url: i => `https://vidsrc.icu/embed/${i.type==='tv'?'tv':'movie'}/${i.tmdbId}` }
         ];
 
+        let playerIsReady = false;
+        let heroQueueItem = null;
+
         window.onload = async () => {
             loadYTAPI();
             await syncCatalog();
@@ -222,7 +225,13 @@
         };
 
         function loadYTAPI() {
-            const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+            window.onYouTubeIframeAPIReady = () => {
+                playerIsReady = true;
+                if(heroQueueItem) initHero(heroQueueItem);
+            };
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(tag);
         }
 
         async function syncCatalog() {
@@ -252,16 +261,21 @@
             document.getElementById('hTitle').innerText = item.title;
             document.getElementById('hDesc').innerText = item.overview;
             
+            if(!playerIsReady) { heroQueueItem = item; return; }
+            
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
             const tr = res.results ? res.results.find(v => v.type==='Trailer' || v.type==='Teaser') : null;
-            if(tr && window.YT) {
+            if(tr) {
                 if(ytPlayer && ytPlayer.loadVideoById) {
                     ytPlayer.loadVideoById({ videoId: tr.key, startSeconds: 0 });
                     ytPlayer.playVideo();
                 } else {
                     ytPlayer = new YT.Player('heroTrailer', {
                         videoId: tr.key,
-                        playerVars: { autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key, fs: 0, iv_load_policy: 3, rel: 0 },
+                        playerVars: { 
+                            autoplay: 1, controls: 0, mute: 1, loop: 1, playlist: tr.key, 
+                            fs: 0, iv_load_policy: 3, rel: 0, origin: window.location.origin 
+                        },
                         events: { onReady: e => { e.target.mute(); e.target.playVideo(); } }
                     });
                 }
