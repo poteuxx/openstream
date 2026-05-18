@@ -129,7 +129,7 @@
     <header id="mainHeader">
         <div class="logo" onclick="location.reload()">
             <div class="logo-badge">OS</div>
-            <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span>SOLUTIONS TECHNOLOGIES</span></div>
+            <div class="logo-text"><h1>OPEN <b>STREAM</b></h1><span id="logoBrand">SOLUTIONS TECHNOLOGIES</span></div>
         </div>
         <nav>
             <a class="nav-link active" id="navHome" onclick="switchView('home')">ACCUEIL</a>
@@ -222,7 +222,7 @@
                 abTitle: 'À Propos d\'OpenStream PRO', abDesc: '<b>OpenStream PRO</b> est une solution industrielle de centralisation multimédia développée par <b>Solutions Technologies</b>.',
                 abTech: 'ENGINE D\'AUTOMATION', abTechD: 'Synchronisation instantanée de 300+ titres avec bandes-annonces héroïques et failover automatique.',
                 abInfra: 'INFRASTRUCTURE', abInfraD: 'Réseau de 24 serveurs haute performance garantissant une disponibilité maximale.',
-                cast: 'Distribution:', staff: 'Réalisateur:', genre: 'Genres:', playImm: 'LECTURE IMMÉDIATE', all: 'TOUS'
+                cast: 'Distribution:', staff: 'Réalisateur:', genre: 'Genres:', playImm: 'LECTURE IMMÉDIATE', all: 'TOUS', force: 'RECLAMATION FORCE BYPASS', langCode: 'fr-FR', brand: 'SOLUTIONS TECHNOLOGIES'
             },
             EN: { 
                 home:'HOME', films:'MOVIES', series:'SERIES', docus:'DOCUS', about:'ABOUT', search:'Search titles...', config:'SYSTEM', play:'PLAY NOW', details:'DETAILS', 
@@ -231,7 +231,7 @@
                 abTitle: 'About OpenStream PRO', abDesc: '<b>OpenStream PRO</b> is an industrial multimedia centralization solution developed by <b>Solutions Technologies</b>.',
                 abTech: 'AUTOMATION ENGINE', abTechD: 'Instant sync of 300+ titles with heroic trailers and automated failover.',
                 abInfra: 'INFRASTRUCTURE', abInfraD: 'High-performance 24-server network ensuring maximum availability.',
-                cast: 'Cast:', staff: 'Director:', genre: 'Genres:', playImm: 'PLAY NOW', all: 'ALL'
+                cast: 'Cast:', staff: 'Director:', genre: 'Genres:', playImm: 'PLAY NOW', all: 'ALL', force: 'FORCE BYPASS RECLAMATION', langCode: 'en-US', brand: 'SOLUTIONS TECHNOLOGIES'
             }
         };
 
@@ -281,10 +281,11 @@
         }
 
         async function syncCatalog() {
+            const l = LOCALE[currentLang];
             const endpoints = ['trending/all/day', 'movie/popular', 'tv/popular', 'discover/movie?with_genres=99'];
             let calls = [];
             // MASSIVE FETCH: 300+ items
-            endpoints.forEach(ep => { for(let p=1; p<=8; p++) calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=fr-FR&page=${p}`); });
+            endpoints.forEach(ep => { for(let p=1; p<=8; p++) calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=${l.langCode}&page=${p}`); });
             const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
             let raw = [];
             results.forEach(res => { if(res.results) raw = [...raw, ...res.results] });
@@ -292,7 +293,7 @@
                 id: i.id, tmdbId: i.id,
                 type: i.media_type === 'tv' ? 'tv' : (i.genre_ids.includes(99) ? 'docu' : 'movie'),
                 title: i.title || i.name,
-                overview: i.overview || "Résumé non disponible.",
+                overview: i.overview || "...",
                 poster: `https://image.tmdb.org/t/p/w500${i.poster_path}`,
                 backdrop: `https://image.tmdb.org/t/p/original${i.backdrop_path}`,
                 year: (i.release_date || i.first_air_date || '2024').split('-')[0],
@@ -302,6 +303,8 @@
             mainCatalog = mainCatalog.filter(i => { const d = seen.has(i.id + i.type); seen.add(i.id + i.type); return !d; });
             const rIdx = Math.floor(Math.random() * Math.min(mainCatalog.length, 50));
             initHero(mainCatalog[rIdx]);
+            updateUI();
+            switchView(currentView);
         }
 
         async function initHero(item) {
@@ -325,8 +328,8 @@
 
         function toggleConfig() {
             currentLang = currentLang === 'FR' ? 'EN' : 'FR';
-            updateUI();
-            switchView(currentView); // RE-RENDER CURRENT PAGE FOR TOTAL TRANSLATION
+            document.getElementById('hTitle').innerText = (currentLang === 'FR' ? 'Synchronisation...' : 'Syncing...');
+            syncCatalog(); // RE-FETCH CATALOG IN NEW LANGUAGE
         }
 
         function updateUI() {
@@ -341,6 +344,10 @@
             
             document.getElementById('hPlayBtn').innerText = l.play;
             document.getElementById('hInfoBtn').innerText = l.details;
+            
+            document.getElementById('logoBrand').innerText = l.brand;
+            const forceBtn = document.querySelector('.repair-brut');
+            if(forceBtn) forceBtn.innerText = l.force;
 
             // Deep Modal Labels
             const tc = document.getElementById('tagCastLab'); if(tc) tc.childNodes[0].textContent = l.cast + ' ';
