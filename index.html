@@ -200,24 +200,36 @@
             z-index: -1;
             transition: opacity 2s ease;
         }
-        /* DASHBOARD (ACCEUIL) */
+        /* DASHBOARD SUPREMACY (ACCEUIL) */
         .welcome-panel {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.05), rgba(157, 80, 187, 0.05));
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.08), rgba(157, 80, 187, 0.08));
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 40px;
+            border-radius: 30px;
+            padding: 80px 60px;
+            margin-bottom: 60px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            gap: 40px;
+            text-align: center;
+            gap: 30px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 50px rgba(0, 242, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        .w-text h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; color: var(--accent); }
-        .w-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
-        .w-stats { display: flex; gap: 20px; }
-        .stat-card { background: rgba(0,0,0,0.4); padding: 15px 25px; border-radius: 15px; border: 1px solid var(--glass-border); text-align: center; min-width: 120px; }
-        .stat-val { display: block; font-size: 1.5rem; font-weight: 950; color: white; }
-        .stat-lab { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+        .welcome-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.1), transparent 50%);
+        }
+        .w-text h2 { font-size: 4rem; font-weight: 950; margin-bottom: 15px; color: var(--accent); letter-spacing: -2px; }
+        .w-text p { color: var(--text-muted); font-size: 1.3rem; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+        .w-stats { display: flex; gap: 30px; margin-top: 20px; }
+        .stat-card { background: rgba(0,0,0,0.5); padding: 25px 40px; border-radius: 20px; border: 1px solid var(--glass-border); text-align: center; min-width: 180px; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-10px); border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+        .stat-val { display: block; font-size: 2.2rem; font-weight: 950; color: white; }
+        .stat-lab { font-size: 0.85rem; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
 
         /* GRID SYSTEM (FILMS/SERIES) */
         .grid-view {
@@ -354,7 +366,7 @@
         .side-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
         .side-rank { font-size: 0.75rem; color: var(--accent); font-weight: 900; }
 
-        .container { padding: 40px; margin-top: -120px; position: relative; z-index: 10; max-width: 1800px; margin-left: auto; margin-right: auto; }
+        .container { padding: 40px; margin-top: 140px; position: relative; z-index: 10; max-width: 1800px; margin-left: auto; margin-right: auto; }
 
         .row-section { margin-bottom: 50px; position: relative; }
         .row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -840,7 +852,12 @@
                 <div class="welcome-panel">
                     <div class="w-text">
                         <h2>Exploration Dashboard</h2>
-                        <p>Plus de ${mainCatalog.length} titres automatisés disponibles. Précision 4K UHD.</p>
+                        <p>Plongez dans un univers de divertissement sans limites avec plus de <b>${mainCatalog.length} titres</b> synchronisés en haute performance.</p>
+                    </div>
+                    <div class="w-stats">
+                        <div class="stat-card"><span class="stat-val">${mainCatalog.length}+</span><span class="stat-lab">Titres Actifs</span></div>
+                        <div class="stat-card"><span class="stat-val">4K UHD</span><span class="stat-lab">Qualité Max</span></div>
+                        <div class="stat-card"><span class="stat-val">SYNC</span><span class="stat-lab">Auto-Update</span></div>
                     </div>
                 </div>
                 <div class="main-layout">
