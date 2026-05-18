@@ -614,6 +614,16 @@
         /* ----------------------------------------------------
            DATA SYNC
         ---------------------------------------------------- */
+        /* GENRE MAPPER */
+        const GENRES = {
+            28: "Action", 12: "Aventure", 16: "Animation", 35: "Comédie", 80: "Crime", 
+            99: "Documentaire", 18: "Drame", 10751: "Famille", 14: "Fantaisie", 
+            36: "Histoire", 27: "Horreur", 10402: "Musique", 9648: "Mystère", 
+            10749: "Romance", 878: "Science-Fiction", 10770: "Téléfilm", 
+            53: "Thriller", 10752: "Guerre", 37: "Western", 10759: "Action/Aventure",
+            10762: "Enfants", 10765: "SF/Fantaisie", 10768: "Guerre/Politique"
+        };
+
         async function syncCatalog() {
             try {
                 const calls = [
@@ -624,19 +634,19 @@
 
                 const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
                 let raw = [];
-                results.forEach(res => raw = [...raw, ...res.results]);
+                results.forEach(res => { if(res.results) raw = [...raw, ...res.results] });
 
                 mainCatalog = raw.filter(i => i.poster_path && i.backdrop_path).map(i => ({
                     id: i.id,
                     tmdbId: i.id,
                     type: i.media_type || (i.title ? 'movie' : 'tv'),
                     title: i.title || i.name,
-                    overview: i.overview || "Résumé en cours de chargement...",
+                    overview: i.overview || "Résumé en cours de chargement pour ce chef-d'œuvre...",
                     poster: `https://image.tmdb.org/t/p/w500${i.poster_path}`,
                     backdrop: `https://image.tmdb.org/t/p/original${i.backdrop_path}`,
-                    rating: i.vote_average.toFixed(1),
+                    rating: i.vote_average ? i.vote_average.toFixed(1) : "8.5",
                     year: (i.release_date || i.first_air_date || '2024').split('-')[0],
-                    genres: i.genre_ids
+                    genres: i.genre_ids ? i.genre_ids.map(id => GENRES[id] || "Divertissement").slice(0, 3).join(', ') : "Premium"
                 }));
 
                 // Unique filter
@@ -710,21 +720,30 @@
         }
 
         function showItemDetails(item) {
+            if(!item) return;
+            // Inject content BEFORE showing to avoid flicker
             document.getElementById('iHero').style.backgroundImage = `url(${item.backdrop})`;
             document.getElementById('iTitle').innerText = item.title;
             document.getElementById('iYear').innerText = item.year;
             document.getElementById('iDesc').innerText = item.overview;
+            document.getElementById('iGenres').innerText = item.genres;
             document.getElementById('iPlayBtn').onclick = () => { closeModal('iModal'); openPlayer(item); };
             
             const modal = document.getElementById('iModal');
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+            requestAnimationFrame(() => modal.classList.add('active'));
         }
 
         function closeModal(id) {
             const modal = document.getElementById(id);
             modal.classList.remove('active');
-            setTimeout(() => modal.style.display = 'none', 500);
+            setTimeout(() => { 
+                modal.style.display = 'none';
+                if(id === 'iModal') { // Clear to avoid data leakage
+                    document.getElementById('iHero').style.backgroundImage = '';
+                    document.getElementById('iTitle').innerText = 'Chargement...';
+                }
+            }, 400);
         }
 
         function scrollRow(id, dir) {
@@ -738,6 +757,10 @@
         function openPlayer(item, serverId = 'vl') {
             activeItem = item;
             activeServer = serverId;
+            
+            // Optimization: Stop the Hero Trailer background video
+            if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+            
             const modal = document.getElementById('pModal');
             const iframe = document.getElementById('brutPlayer');
             const svGrid = document.getElementById('svGrid');
@@ -752,30 +775,24 @@
                 svGrid.appendChild(b);
             });
 
-            // BRUT LOADING LOGIC
             const server = SERVERS.find(s => s.id === activeServer);
-            const targetUrl = server.url(activeItem);
-            
-            iframe.src = targetUrl;
-            modal.classList.add('active');
+            iframe.src = server.url(activeItem);
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('active'));
             document.body.style.overflow = 'hidden';
             
-            console.log(`[OX BRUT] Loading Flux: ${targetUrl}`);
-        }
-
-        function reclaimPlayer() {
-            if(!activeItem) return;
-            console.warn("[OX RECOVERY] Sandbox Flag Detected. Attempting Rebuild Load...");
-            // Cycle to next server automatically if user reports broken flux
-            const idx = SERVERS.findIndex(s => s.id === activeServer);
-            const next = SERVERS[(idx + 1) % SERVERS.length];
-            openPlayer(activeItem, next.id);
+            console.log(`[OX] Player Mode: ON | Server: ${activeServer}`);
         }
 
         function closePlayer() {
             document.getElementById('pModal').classList.remove('active');
-            document.getElementById('brutPlayer').src = '';
-            document.body.style.overflow = '';
+            setTimeout(() => {
+                document.getElementById('pModal').style.display = 'none';
+                document.getElementById('brutPlayer').src = '';
+                document.body.style.overflow = '';
+                // Resume Hero Trailer if active
+                if(ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+            }, 400);
         }
 
         /* ----------------------------------------------------
