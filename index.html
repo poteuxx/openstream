@@ -103,9 +103,10 @@
         .m-btn:hover { background: var(--accent); transform: scale(1.1); }
 
         /* PREMIUM DETAILS MODAL (RESTORED) */
-        .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.96); backdrop-filter: blur(40px); display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.4s var(--transition); }
+        .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.8); backdrop-filter: blur(40px); display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.6s var(--transition); }
         .modal.active { display: flex; opacity: 1; }
-        .m-content { background: #080a12; width: 95%; max-width: 1100px; max-height: 92vh; border-radius: 30px; border: 1px solid var(--glass-border); overflow-y: auto; position: relative; box-shadow: 0 50px 150px rgba(0,0,0,1); }
+        .m-content { background: #080a12; width: 95%; max-width: 1100px; max-height: 92vh; border-radius: 30px; border: 1px solid var(--glass-border); overflow-y: auto; position: relative; box-shadow: 0 50px 150px rgba(0,0,0,1); transform: scale(0.9) translateY(60px); transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal.active .m-content { transform: scale(1) translateY(0); }
         .m-close { position: absolute; top: 30px; right: 30px; width: 45px; height: 45px; background: rgba(0,0,0,0.6); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: 0.3s; }
         .m-close:hover { background: #ff4757; transform: rotate(90deg); }
 
@@ -130,10 +131,15 @@
         .btn-sec { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); }
         
         /* SPLASH & ASSISTANT */
-        #splash { position: fixed; inset: 0; z-index: 99999; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .s-loader-shell { width: 300px; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin: 30px 0; }
-        #s-progress { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #0072ff); transition: 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        #s-tag { color: var(--accent); font-size: 0.7rem; font-weight: 950; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px; opacity: 0.8; min-height: 20px; }
+        #splash { position: fixed; inset: 0; z-index: 99999; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        #splash::before { content: '0X88FF 0X99AA 0XCCBB 0XFFEE'; position: absolute; top: 0; font-family: monospace; color: var(--accent); opacity: 0.05; font-size: 8rem; white-space: nowrap; animation: matrixMove 20s linear infinite; pointer-events: none; }
+        @keyframes matrixMove { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+        .s-loader-shell { width: 400px; height: 3px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; margin: 30px 0; position: relative; }
+        #s-progress { width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #0072ff); transition: 0.4s; position: relative; }
+        #s-progress::after { content: ''; position: absolute; right: 0; top: 0; width: 40px; height: 100%; background: white; box-shadow: 0 0 15px white; }
+        #s-tag { color: var(--accent); font-size: 0.75rem; font-weight: 950; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px; opacity: 0.9; min-height: 20px; font-family: monospace; }
+        #s-hex { font-family: monospace; font-size: 0.6rem; color: #475569; position: absolute; bottom: 40px; }
 
         #nova { position: fixed; bottom: 40px; left: 40px; z-index: 9000; display: none; align-items: center; gap: 20px; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(30px); }
         #nova.active { display: flex; opacity: 1; transform: translateY(0); }
@@ -162,10 +168,11 @@ nt); }
 <body>
 
     <div id="splash">
-        <div class="logo-badge" style="width:100px; height:100px; font-size:2.5rem; margin-bottom:30px;">OS</div>
-        <div class="logo-text" style="text-align:center;"><h1>OPEN <b>STREAM</b></h1></div>
+        <div class="logo-badge" style="width:120px; height:120px; font-size:3rem; margin-bottom:40px;">OS</div>
+        <div class="logo-text" style="text-align:center;"><h1>OPEN <b>STREAM</b></h1><span style="font-size:0.7rem; letter-spacing:8px; opacity:0.5;">SOLUTIONS TECHNOLOGIES</span></div>
         <div class="s-loader-shell"><div id="s-progress"></div></div>
-        <div id="s-tag">Initializing Core Systems...</div>
+        <div id="s-tag">Booting OS Logic Core...</div>
+        <div id="s-hex">0X000000</div>
     </div>
 
     <div id="nova">
@@ -327,19 +334,30 @@ nt); }
         function updateSplash(p, text) {
             document.getElementById('s-progress').style.width = p + '%';
             document.getElementById('s-tag').innerText = text;
+            document.getElementById('s-hex').innerText = '0X' + Math.floor(Math.random()*16777215).toString(16).toUpperCase();
         }
 
         window.onload = async () => {
-            updateSplash(10, "Initializing YT Engine...");
+            updateSplash(5, "Loading Kernels...");
+            await new Promise(r => setTimeout(r, 400));
+            updateSplash(15, "Neural Link Handshake...");
             loadYTAPI();
-            updateSplash(30, "Syncing Global Catalog...");
+            await new Promise(r => setTimeout(r, 400));
+            updateSplash(25, "Synchronizing Failover Matrix...");
+            updateSplash(35, "Scanning 24 High-Perf Nodes...");
+            await new Promise(r => setTimeout(r, 300));
+            updateSplash(45, "Fetching Global Metadata...");
             await syncCatalog();
-            updateSplash(70, "configuring Search Logic...");
+            updateSplash(65, "Deploying Nova Assistant...");
+            await new Promise(r => setTimeout(r, 400));
+            updateSplash(75, "Encrypting System Hooks...");
             setupSearch();
-            updateSplash(90, "Finalizing UI Handshake...");
+            updateSplash(85, "Optimizing UI Physics...");
+            await new Promise(r => setTimeout(r, 300));
+            updateSplash(95, "Manifesting Interface...");
             switchView('home', false);
             updateUI();
-            updateSplash(100, "Core Ready.");
+            updateSplash(100, "Core Stable. Launching.");
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => document.getElementById('splash').remove(), 1200);
