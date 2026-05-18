@@ -48,14 +48,14 @@
         .search-shell:hover input, .search-shell:focus-within input { opacity: 1; }
         .search-btn { position: absolute; right: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: var(--accent); transition: 0.3s; }
 
-        /* GLOBAL HERO ENGINE */
-        .hero { position: relative; width: 100%; height: 90vh; display: flex; align-items: center; padding: 0 60px; overflow: hidden; background: #000; }
-        #heroTrailer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; transform: scale(1.15); transition: opacity 1s; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg-deep) 15%, transparent 100%), linear-gradient(0deg, var(--bg-deep) 0%, transparent 40%); z-index: 3; }
-        .hero-content { position: relative; z-index: 10; max-width: 850px; transition: 0.5s var(--transition); }
+        /* GLOBAL HERO ENGINE (NETFLIX STYLE) */
+        .hero { position: relative; width: 100%; height: 95vh; display: flex; align-items: flex-end; padding: 0 60px 100px; overflow: hidden; background: #000; }
+        #heroTrailer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; transform: scale(1.15); transition: opacity 0.8s; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, var(--bg-deep) 100%), linear-gradient(90deg, rgba(0,0,0,0.8) 0%, transparent 60%); z-index: 3; }
+        .hero-content { position: relative; z-index: 10; max-width: 45%; pointer-events: auto; }
         
-        .hero-h1 { font-size: 4.5rem; font-weight: 950; line-height: 1; margin-bottom: 25px; text-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .hero-p { font-size: 1.2rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 40px; max-width: 700px; }
+        .hero-h1 { font-size: 3.5rem; font-weight: 950; line-height: 1.1; margin-bottom: 15px; text-shadow: 0 5px 25px rgba(0,0,0,1); }
+        .hero-p { font-size: 1rem; color: #e2e8f0; line-height: 1.6; margin-bottom: 30px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 10px rgba(0,0,0,1); }
         
         .mute-toggle { position: absolute; bottom: 60px; right: 60px; width: 55px; height: 55px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; transition: 0.4s; }
         .mute-toggle.active-sound { background: var(--accent); color: black; border-color: var(--accent); box-shadow: 0 0 30px var(--accent); }
@@ -271,15 +271,17 @@
         function infoCurrentHero() { showItemDetails(heroItem); }
 
         function switchView(view) {
+            currentView = view;
             document.querySelectorAll('.nav-link').forEach(l => {
                 l.classList.remove('active');
                 if(l.getAttribute('onclick').includes(`'${view}'`)) l.classList.add('active');
             });
             const grid = document.getElementById('dynamicRows');
             grid.innerHTML = '';
-            const hCont = document.getElementById('hContent');
-            if(view === 'home') { hCont.style.opacity = '1'; hCont.style.pointerEvents = 'auto'; renderDashboard(); }
-            else { hCont.style.opacity = '0'; hCont.style.pointerEvents = 'none'; renderGrid(view); }
+            
+            // Hero is GLOBAL and ALWAYS VISIBLE
+            if(view === 'home') { renderDashboard(); }
+            else { renderGrid(view); }
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -312,14 +314,23 @@
             return el;
         }
 
-        async function updateHeroTeaser(item) {
+        async function updateHeroTeaser(item, isRestore = false) {
             if(!ytPlayer) return;
+            
+            // Update Text in Real-Time
+            document.getElementById('hTitle').innerText = item.title;
+            document.getElementById('hDesc').innerText = item.overview;
+            
             const res = await fetch(`https://api.themoviedb.org/3/${item.type==='tv'?'tv':'movie'}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r=>r.json());
             const tr = res.results.find(v => v.type==='Trailer');
-            if(tr) ytPlayer.loadVideoById(tr.key);
+            if(tr) {
+                ytPlayer.loadVideoById(tr.key);
+                ytPlayer.playVideo();
+                document.getElementById('heroTrailer').style.opacity = '1';
+            }
         }
 
-        function restoreHeroTeaser() { if(heroItem && ytPlayer) updateHeroTeaser(heroItem); }
+        function restoreHeroTeaser() { if(heroItem) updateHeroTeaser(heroItem, true); }
 
         async function showItemDetails(item) {
             if(!item) return;
