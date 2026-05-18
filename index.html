@@ -166,10 +166,11 @@ nt); }
         .module-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 25px; padding: 40px; transition: 0.5s var(--transition); cursor: default; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .module-card:hover { transform: translateY(-10px) scale(1.03); background: rgba(255,255,255,0.05); border-color: var(--accent); box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px var(--accent-glow); }
         
-        #compactProgress { position: fixed; bottom: 20px; right: 20px; z-index: 5000; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--glass-border); padding: 8px 18px; border-radius: 12px; display: none; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(40px); font-size: 0.65rem; font-weight: 950; color: var(--accent); transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1); opacity: 0; transform: translateY(20px); pointer-events: none; }
+        #compactProgress { position: fixed; bottom: 20px; right: 20px; z-index: 5000; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--glass-border); padding: 10px 20px; border-radius: 12px; display: none; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(40px); font-size: 0.65rem; font-weight: 950; color: var(--accent); transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1); opacity: 0; transform: translateY(20px); pointer-events: none; min-width: 200px; }
         #compactProgress.visible { display: flex; opacity: 1; transform: translateY(0); }
-        .cp-loader { width: 60px; height: 2px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; }
-        #cp-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .cp-loader { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .cp-spinner { width: 25px; height: 25px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .welcome-panel h2 { font-size: 4.5rem; font-weight: 950; color: white; line-height: 1.1; margin-bottom: 10px; }
         .welcome-panel p { color: #f1f5f9; font-weight: 300; font-size: 1.1rem; line-height: 1.8; max-width: 800px; }
         .hero-tag { color: var(--accent) !important; font-weight: 900 !important; font-size: 1.3rem !important; text-transform: uppercase !important; letter-spacing: 6px !important; margin-bottom: 15px; display: block; }
@@ -188,10 +189,10 @@ nt); }
     </div>
 
     <div id="compactProgress">
-        <div class="cp-loader"><div id="cp-bar"></div></div>
+        <div class="cp-loader"><div class="cp-spinner"></div></div>
         <div style="display:flex; flex-direction:column; gap:2px;">
-            <span style="letter-spacing:2px;">SYNCING CORE</span>
-            <span id="cp-tag" style="color:white; font-size:0.6rem; opacity:0.6;">0% COMPLETE</span>
+            <span id="cp-status" style="letter-spacing:1px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; max-width:180px;">INITIALIZING...</span>
+            <span id="cp-tag" style="color:white; font-size:0.6rem; opacity:0.6;">0% SYNCED</span>
         </div>
     </div>
 
@@ -372,8 +373,8 @@ nt); }
             document.getElementById('s-hex').innerText = '0X' + Math.floor(Math.random()*16777215).toString(16).toUpperCase();
             
             if(skippedSplash) {
-                document.getElementById('cp-bar').style.width = p + '%';
-                document.getElementById('cp-tag').innerText = Math.floor(p) + '% SYNC';
+                document.getElementById('cp-status').innerText = text.toUpperCase();
+                document.getElementById('cp-tag').innerText = Math.floor(p) + '% CORE SYNCED';
                 if(p >= 100) {
                     const cp = document.getElementById('compactProgress');
                     setTimeout(() => {
