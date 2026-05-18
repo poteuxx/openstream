@@ -1,45 +1,60 @@
-// Small static catalog
+```javascript
 const catalog = [
-  {title:"Big Buck Bunny", link:"https://archive.org/details/BigBuckBunny_124", poster:"https://archive.org/services/img/BigBuckBunny_124"},
-  {title:"Sintel", link:"https://archive.org/details/Sintel", poster:"https://archive.org/services/img/Sintel"},
-  {title:"Elephants Dream", link:"https://archive.org/details/ElephantsDream", poster:"https://archive.org/services/img/ElephantsDream"}
+    {
+        title: "Big Buck Bunny",
+        description: "A legendary open-source animated adventure filled with cinematic visuals and immersive storytelling.",
+        genre: "Animation",
+        rating: "9.1",
+        poster: "https://archive.org/services/img/BigBuckBunny_124",
+        link: "https://archive.org/details/BigBuckBunny_124"
+    },
+
+    {
+        title: "Sintel",
+        description: "An emotional fantasy journey featuring dragons, mystery and breathtaking environments.",
+        genre: "Fantasy",
+        rating: "8.7",
+        poster: "https://archive.org/services/img/Sintel",
+        link: "https://archive.org/details/Sintel"
+    },
+
+    {
+        title: "Elephants Dream",
+        description: "A surreal cyber-inspired experimental film with futuristic artistic visuals.",
+        genre: "Sci‑Fi",
+        rating: "8.4",
+        poster: "https://archive.org/services/img/ElephantsDream",
+        link: "https://archive.org/details/ElephantsDream"
+    },
+
+    {
+        title: "Cosmos Future",
+        description: "Dive into interstellar civilizations, futuristic AI and unknown galaxies.",
+        genre: "Space",
+        rating: "9.4",
+        poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop",
+        link: "https://archive.org"
+    },
+
+    {
+        title: "Neon Tokyo",
+        description: "Cyberpunk mega-city with glowing neon streets and rogue hackers.",
+        genre: "Cyberpunk",
+        rating: "9.0",
+        poster: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?q=80&w=1200&auto=format&fit=crop",
+        link: "https://archive.org"
+    },
+
+    {
+        title: "Quantum Protocol",
+        description: "Elite agents navigate futuristic warfare controlled by artificial intelligence.",
+        genre: "Action",
+        rating: "8.9",
+        poster: "https://images.unsplash.com/photo-1515630278258-407f66498911?q=80&w=1200&auto=format&fit=crop",
+        link: "https://archive.org"
+    }
 ];
 
-// DOM elements
 const content = document.getElementById("content");
-const searchInput = document.getElementById("search");
-
-// Build page
-function buildHome(list=catalog){
-  content.innerHTML = "";
-  const section = document.createElement("div");
-  section.className = "section";
-  section.innerHTML = "<h2>Movies</h2>";
-  const row = document.createElement("div");
-  row.className = "row";
-
-  list.forEach(movie=>{
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<img src="${movie.poster}"><div style="text-align:center;padding:5px">${movie.title}</div>`;
-    card.onclick = () => window.open(movie.link, "_blank");
-    row.appendChild(card);
-  });
-
-  section.appendChild(row);
-  content.appendChild(section);
-}
-
-// Initial render
-buildHome();
-
-// Search functionality
-searchInput.addEventListener("input", e=>{
-  const q = e.target.value.toLowerCase();
-  if(q.length < 1){
-    buildHome();
-    return;
-  }
-  const results = catalog.filter(m => m.title.toLowerCase().includes(q));
-  buildHome(results);
-});
+const search
+```
