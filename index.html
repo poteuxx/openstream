@@ -314,12 +314,18 @@
             background: rgba(255,255,255,0.02);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 25px;
+            overflow: hidden;
             height: fit-content;
             position: sticky;
             top: 100px;
         }
 
+        .side-preview { width: 100%; height: 180px; background: #000; position: relative; border-bottom: 1px solid var(--glass-border); display: none; }
+        .side-preview iframe { width: 100%; height: 100%; border: none; }
+        .preview-mute { position: absolute; bottom: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+        .preview-mute:hover { background: var(--accent); color: #000; }
+
+        .side-body { padding: 25px; }
         .side-title { font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
         .side-item { display: flex; gap: 15px; margin-bottom: 18px; cursor: pointer; transition: 0.3s; }
         .side-item:hover { transform: translateX(5px); }
@@ -738,15 +744,18 @@
 
         async function syncCatalog() {
             try {
-                const calls = [
-                    `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/movie/now_playing?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/tv/top_rated?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/tv/on_the_air?api_key=${TMDB_KEY}&language=fr-FR`
+                const endpoints = [
+                    'trending/all/day', 'movie/popular', 'movie/top_rated', 
+                    'movie/now_playing', 'tv/popular', 'tv/top_rated', 'tv/on_the_air'
                 ];
+                
+                // Fetch 3 pages of each endpoint for a massive library
+                let calls = [];
+                endpoints.forEach(ep => {
+                    for(let p=1; p<=3; p++) {
+                        calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=fr-FR&page=${p}`);
+                    }
+                });
 
                 const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
                 let raw = [];
@@ -768,8 +777,8 @@
                 // Intelligent De-duplication
                 const seen = new Set();
                 mainCatalog = fullSet.filter(item => {
-                    const duplicate = seen.has(item.id);
-                    seen.add(item.id);
+                    const duplicate = seen.has(item.id + item.type);
+                    seen.add(item.id + item.type);
                     return !duplicate;
                 });
 
@@ -817,10 +826,18 @@
                 <div class="main-layout">
                     <div class="content-area" id="mainContent"></div>
                     <div class="sidebar" id="sideContent">
-                        <div class="side-title">TOP TENDANCES</div>
-                        <div id="topList"></div>
-                        <div class="side-title" style="margin-top:40px">VOTRE STATUT</div>
-                        <div class="stat-card" style="margin-bottom:10px"><span class="stat-val">PREMIUM</span><span class="stat-lab">Accès Illimité</span></div>
+                        <div class="side-preview" id="sidePreview" style="display:none">
+                            <div id="sideYT"></div>
+                            <button class="preview-mute" id="pMuteBtn" onclick="togglePrevSound()">
+                                <svg id="pMuteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/></svg>
+                            </button>
+                        </div>
+                        <div class="side-body">
+                            <div class="side-title">TOP TENDANCES</div>
+                            <div id="topList"></div>
+                            <div class="side-title" style="margin-top:40px">VOTRE STATUT</div>
+                            <div class="stat-card" style="margin-bottom:10px"><span class="stat-val">PREMIUM</span><span class="stat-lab">Accès Illimité</span></div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -878,24 +895,62 @@
             el.innerHTML = `
                 <img src="${item.poster}" loading="lazy">
                 <div class="m-overlay">
-                    <h3 class="m-title">${item.title}</h3>
+                    <div class="m-title">${item.title}</div>
                     <div class="m-actions">
-                        <div class="m-btn play" title="Lire maintenant">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                        </div>
-                        <div class="m-btn info" title="Plus d'infos">
+                        <button class="m-btn play" onclick="event.stopPropagation(); openPlayer(mainCatalog.find(i=>i.tmdbId==${item.tmdbId} && i.type=='${item.type}'))">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button class="m-btn info" onclick="event.stopPropagation(); showItemDetails(mainCatalog.find(i=>i.tmdbId==${item.tmdbId} && i.type=='${item.type}'))">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        </div>
+                        </button>
                     </div>
                 </div>
             `;
-            
-            // Dedicated button clicks
-            el.querySelector('.play').onclick = (e) => { e.stopPropagation(); openPlayer(item); };
-            el.querySelector('.info').onclick = (e) => { e.stopPropagation(); showItemDetails(item); };
-            el.onclick = () => showItemDetails(item); // Clicking the card opens details by default
-
+            el.onclick = () => showItemDetails(item);
+            el.onmouseenter = () => startPreview(item);
+            el.onmouseleave = () => stopPreview();
             return el;
+        }
+
+        let prevTimer = null;
+        let pPlayer = null;
+        let pMuted = true;
+
+        async function startPreview(item) {
+            clearTimeout(prevTimer);
+            prevTimer = setTimeout(async () => {
+                const box = document.getElementById('sidePreview');
+                if(!box) return;
+                try {
+                    const res = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/videos?api_key=${TMDB_KEY}`).then(r => r.json());
+                    const tr = res.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+                    if(tr && window.YT) {
+                        box.style.display = 'block';
+                        pPlayer = new YT.Player('sideYT', {
+                            videoId: tr.key,
+                            playerVars: { 'autoplay': 1, 'controls': 0, 'mute': (pMuted?1:0), 'modestbranding': 1 },
+                            events: { 'onReady': (e) => e.target.playVideo() }
+                        });
+                    }
+                } catch(e){}
+            }, 1200);
+        }
+
+        function stopPreview() {
+            clearTimeout(prevTimer);
+            const box = document.getElementById('sidePreview');
+            if(box) box.style.display = 'none';
+            if(pPlayer) { try { pPlayer.destroy(); } catch(e){} pPlayer = null; }
+            const sideBody = document.getElementById('sidePreview');
+            if(sideBody) sideBody.innerHTML = '<div id="sideYT"></div><button class="preview-mute" id="pMuteBtn" onclick="togglePrevSound()"><svg id="pMuteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/></svg></button>';
+        }
+
+        function togglePrevSound() {
+            if(!pPlayer) return;
+            pMuted = !pMuted;
+            const icon = document.getElementById('pMuteIcon');
+            if(pMuted) { pPlayer.mute(); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/>'; }
+            else { pPlayer.unMute(); icon.innerHTML = '<path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>'; }
         }
 
         async function showItemDetails(item) {
