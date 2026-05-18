@@ -15,17 +15,17 @@
     
     <style>
         :root {
-            --bg-deep: #05070a;
-            --bg-card: #0c0f17;
-            --accent: #00d9ff;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #ff3cac;
+            --bg-deep: #020406;
+            --bg-card: #080a0f;
+            --accent: #00f2ff;
+            --accent-purple: #9d50bb;
+            --accent-pink: #f21b7f;
             --text: #ffffff;
-            --text-muted: #8b95b7;
-            --glass: rgba(15, 20, 35, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            --shadow-glow: 0 10px 40px rgba(0, 217, 255, 0.15);
+            --text-muted: #94a3b8;
+            --glass: rgba(8, 12, 18, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-neon: 0 4px 20px rgba(0, 242, 255, 0.3);
         }
 
         * {
@@ -241,30 +241,36 @@
         .mute-toggle:hover { background: var(--accent); color: black; border-color: var(--accent); }
         .btn-main {
             padding: 14px 28px;
-            border-radius: 14px;
+            border-radius: 12px;
             font-weight: 800;
             font-size: 0.95rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
-            transition: 0.4s var(--transition);
-            border: none;
+            transition: 0.5s var(--transition);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .btn-primary { 
-            background: linear-gradient(135deg, var(--accent), var(--accent-purple)); 
+            background: linear-gradient(90deg, #00f2ff, #0072ff);
             color: white; 
-            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
         }
-        .btn-primary:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5); }
+        .btn-primary:hover { 
+            background: white; 
+            color: black; 
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.6);
+            transform: scale(1.05);
+        }
         
         .btn-sec { 
-            background: rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.05); 
             color: white; 
-            backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
         }
-        .btn-sec:hover { background: rgba(255,255,255,0.25); }
+        .btn-sec:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 20px rgba(255,255,255,0.1); }
 
         /* MAIN CONTENT GRID */
         .container { padding: 40px; margin-top: -120px; position: relative; z-index: 10; }
@@ -418,17 +424,19 @@
         .m-btn.play { background: white; color: black; border: none; }
 
         /* INFO MODAL STYLES (Netflix Clone) */
-        .info-modal .m-content { max-width: 900px; border-radius: 12px; }
-        .i-hero { width: 100%; height: 450px; background-size: cover; background-position: center; position: relative; }
+        .info-modal .m-content { max-width: 950px; border-radius: 16px; scrollbar-width: none; }
+        .i-hero { width: 100%; height: 480px; background-size: cover; background-position: center; position: relative; }
         .i-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg-card) 0%, transparent 60%); }
-        .i-body { padding: 30px 50px; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
-        .i-main h2 { font-size: 2.5rem; font-weight: 950; margin-bottom: 20px; }
-        .i-stats { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; }
-        .match { color: #46d369; font-weight: 800; }
-        .i-desc { font-size: 1.05rem; color: #d2d2d2; line-height: 1.6; }
-        .i-side { display: flex; flex-direction: column; gap: 20px; }
-        .tag-info { font-size: 0.85rem; color: #777; }
-        .tag-info span { color: #fff; }
+        .i-body { padding: 40px 60px; display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 50px; }
+        .i-main h2 { font-size: 3rem; font-weight: 950; margin-bottom: 25px; letter-spacing: -1px; }
+        .i-stats { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .match { color: #00ff88; font-weight: 900; }
+        .i-desc { font-size: 1.1rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 30px; }
+        .i-side { display: flex; flex-direction: column; gap: 25px; }
+        .tag-info { font-size: 0.9rem; color: #64748b; line-height: 1.5; }
+        .tag-info span { color: #f1f5f9; font-weight: 600; display: block; margin-top: 5px; }
+        .cast-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .actor-tag { background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
 
         /* BRUT PLAYER SYSTEM */
         .player-frame { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; background: black; }
@@ -598,8 +606,9 @@
                     </div>
                 </div>
                 <div class="i-side">
-                    <div class="tag-info">Genres: <span id="iGenres">Action</span></div>
-                    <div class="tag-info">Studio: <span>Solutions Technologies</span></div>
+                    <div class="tag-info">Distribution: <div class="cast-list" id="iCast"></div></div>
+                    <div class="tag-info">Genres: <span id="iGenres">Chargement...</span></div>
+                    <div class="tag-info">Production: <span id="iStudio">Solutions Technologies & OpenStream Hub Production</span></div>
                 </div>
             </div>
         </div>
@@ -770,9 +779,10 @@
             return el;
         }
 
-        function showItemDetails(item) {
+        async function showItemDetails(item) {
             if(!item) return;
-            // Inject content BEFORE showing to avoid flicker
+            
+            // UI Preparation
             document.getElementById('iHero').style.backgroundImage = `url(${item.backdrop})`;
             document.getElementById('iTitle').innerText = item.title;
             document.getElementById('iYear').innerText = item.year;
@@ -780,6 +790,17 @@
             document.getElementById('iGenres').innerText = item.genres;
             document.getElementById('iPlayBtn').onclick = () => { closeModal('iModal'); openPlayer(item); };
             
+            // Automation: Deep Fetch Credits
+            const castBox = document.getElementById('iCast');
+            castBox.innerHTML = '<div class="actor-tag">Sync...</div>';
+            
+            try {
+                const cred = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/credits?api_key=${TMDB_KEY}`).then(r => r.json());
+                if(cred && cred.cast) {
+                    castBox.innerHTML = cred.cast.slice(0, 5).map(c => `<div class="actor-tag">${c.name}</div>`).join('');
+                }
+            } catch(e) { castBox.innerHTML = 'N/A'; }
+
             const modal = document.getElementById('iModal');
             modal.style.display = 'flex';
             requestAnimationFrame(() => modal.classList.add('active'));
