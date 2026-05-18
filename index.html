@@ -88,15 +88,10 @@
             justify-content: space-between;
             padding: 15px 40px;
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border-bottom: 1px solid var(--glass-border);
             transition: var(--transition);
-        }
-
-        header.scrolled {
-            padding: 10px 40px;
-            background: rgba(5, 7, 10, 0.95);
         }
 
         .branding {
@@ -104,6 +99,7 @@
             align-items: center;
             gap: 15px;
             cursor: pointer;
+            z-index: 1100;
         }
 
         .logo-ring {
@@ -122,18 +118,25 @@
         .brand-text h1 { font-size: 1.3rem; font-weight: 950; letter-spacing: -1px; }
         .brand-text span { font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
 
-        nav { display: flex; gap: 15px; margin-left: 40px; }
+        nav { display: flex; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 14px; border: 1px solid var(--glass-border); }
         .nav-link {
-            padding: 10px 20px;
-            border-radius: 12px;
+            padding: 8px 18px;
+            border-radius: 10px;
             color: var(--text-muted);
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
+            font-weight: 700;
+            font-size: 0.85rem;
             transition: 0.3s;
             cursor: pointer;
+            border: 1px solid transparent;
         }
-        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,0.06); }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-link.active { 
+            color: white; 
+            background: linear-gradient(90deg, #00f2ff, #0072ff); 
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+            border-color: rgba(255,255,255,0.2);
+        }
 
         .search-container {
             position: relative;
@@ -197,7 +200,32 @@
             z-index: -1;
             transition: opacity 2s ease;
         }
-        #heroTrailer iframe { width: 100.2%; height: 100.2%; border: none; transform: scale(1.15); }
+        /* DASHBOARD (ACCEUIL) */
+        .welcome-panel {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.05), rgba(157, 80, 187, 0.05));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+        .w-text h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; color: var(--accent); }
+        .w-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        .w-stats { display: flex; gap: 20px; }
+        .stat-card { background: rgba(0,0,0,0.4); padding: 15px 25px; border-radius: 15px; border: 1px solid var(--glass-border); text-align: center; min-width: 120px; }
+        .stat-val { display: block; font-size: 1.5rem; font-weight: 950; color: white; }
+        .stat-lab { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+
+        /* GRID SYSTEM (FILMS/SERIES) */
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
 
         .hero-content { max-width: 800px; opacity: 0; transform: translateY(40px); transition: 1s var(--transition); }
         .hero-content.active { opacity: 1; transform: translateY(0); }
@@ -540,12 +568,11 @@
             </div>
         </div>
 
-        <nav>
-            <a class="nav-link active" onclick="filterType('all')">ACCUEIL</a>
-            <a class="nav-link" onclick="filterType('movie')">FILMS</a>
-            <a class="nav-link" onclick="filterType('tv')">SÉRIES</a>
-            <a class="nav-link" onclick="scrollToRows()">TENDANCES</a>
-        </nav>
+    <nav>
+        <a class="nav-link active" onclick="switchView('home')">ACCEUIL</a>
+        <a class="nav-link" onclick="switchView('movie')">FILMS</a>
+        <a class="nav-link" onclick="switchView('tv')">SÉRIES</a>
+    </nav>
 
         <div class="search-container">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -607,8 +634,8 @@
                 </div>
                 <div class="i-side">
                     <div class="tag-info">Distribution: <div class="cast-list" id="iCast"></div></div>
+                    <div class="tag-info">Réalisateur/Staff: <span id="iDirector">Sync...</span></div>
                     <div class="tag-info">Genres: <span id="iGenres">Chargement...</span></div>
-                    <div class="tag-info">Production: <span id="iStudio">Solutions Technologies & OpenStream Hub Production</span></div>
                 </div>
             </div>
         </div>
@@ -644,13 +671,17 @@
         let activeItem = null;
         let activeServer = 'vl';
         
+        // Global State
+        let currentView = 'home'; // home, movie, tv
+        
         // Anti-Sandbox / Anti-Flagged Servers
         const SERVERS = [
-            { id: 'vl', name: 'FLUX FR 1', url: item => `https://frembed.pro/api/${item.type === 'movie' ? 'film' : 'serie'}.php?id=${item.tmdbId}` },
-            { id: 'ae', name: 'FR AUTO', url: item => `https://autoembed.co/${item.type === 'movie' ? 'movie' : 'tv'}/tmdb/${item.tmdbId}?lang=fr` },
+            { id: 'vl', name: 'FLUX PRO 1', url: item => `https://frembed.pro/api/${item.type === 'movie' ? 'film' : 'serie'}.php?id=${item.tmdbId}` },
+            { id: 'v2', name: 'FLUX PRO 2', url: item => `https://vidsrc.to/embed/${item.type === 'movie' ? 'movie' : 'tv'}/${item.tmdbId}` },
+            { id: 'ae', name: 'AUTO FR', url: item => `https://autoembed.co/${item.type === 'movie' ? 'movie' : 'tv'}/tmdb/${item.tmdbId}?lang=fr` },
             { id: 'vp', name: 'VIDSRC PRO', url: item => `https://vidsrc.pro/embed/${item.type === 'movie' ? 'movie' : 'tv'}/${item.tmdbId}` },
-            { id: 'me', name: 'VANILLA ME', url: item => `https://vidsrc.me/embed/${item.type === 'movie' ? 'movie' : 'tv'}?tmdb=${item.tmdbId}` },
-            { id: 'su', name: 'CLOUD EMBED', url: item => `https://embed.su/embed/${item.type === 'movie' ? 'movie' : 'tv'}/${item.tmdbId}` }
+            { id: 'me', name: 'VANILLA', url: item => `https://vidsrc.me/embed/${item.type === 'movie' ? 'movie' : 'tv'}?tmdb=${item.tmdbId}` },
+            { id: 'su', name: 'CLOUD', url: item => `https://embed.su/embed/${item.type === 'movie' ? 'movie' : 'tv'}/${item.tmdbId}` }
         ];
 
         window.onload = async () => {
@@ -658,11 +689,7 @@
             loadYTAPI();
             await syncCatalog();
             setupSearch();
-            window.onscroll = () => {
-                const h = document.getElementById('mainHeader');
-                if (window.scrollY > 50) h.classList.add('scrolled');
-                else h.classList.remove('scrolled');
-            };
+            switchView('home'); // Init with Dashboard
         };
 
         function loadYTAPI() {
@@ -719,23 +746,51 @@
             }
         }
 
-        /* ----------------------------------------------------
-           ROW RENDERING & ARROW CONTROL
-        ---------------------------------------------------- */
-        function renderRows() {
-            const sections = [
-                { id: 'trend', title: 'TENDANCES ACTUELLES', filter: () => true },
-                { id: 'movies', title: 'CINÉMA PREMIUM', filter: i => i.type === 'movie' },
-                { id: 'series', title: 'SÉRIES TOP RATED', filter: i => i.type === 'tv' }
-            ];
-
+        /* SPA ROUTING & RENDERING */
+        function switchView(view) {
+            currentView = view;
+            // Update Nav UI
+            document.querySelectorAll('.nav-link').forEach(l => {
+                l.classList.remove('active');
+                if(l.getAttribute('onclick').includes(`'${view}'`)) l.classList.add('active');
+            });
+            
             const grid = document.getElementById('dynamicRows');
             grid.innerHTML = '';
+            
+            if(view === 'home') {
+                document.getElementById('heroView').style.display = 'flex';
+                renderDashboard();
+            } else {
+                document.getElementById('heroView').style.display = 'none';
+                renderGrid(view);
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('dynamicRows');
+            grid.innerHTML = `
+                <div class="welcome-panel">
+                    <div class="w-text">
+                        <h2>Bienvenue sur OpenStream PRO</h2>
+                        <p>Explorez notre bibliothèque intelligente de films et séries en 4K UHD. <br>Solutions Technologies — L'excellence du streaming automatisé.</p>
+                    </div>
+                    <div class="w-stats">
+                        <div class="stat-card"><span class="stat-val">${mainCatalog.length}+</span><span class="stat-lab">Titres</span></div>
+                        <div class="stat-card"><span class="stat-val">24/7</span><span class="stat-lab">Uptime</span></div>
+                    </div>
+                </div>
+            `;
+            
+            const sections = [
+                { id: 'trend', title: 'TENDANCES ACTUELLES', filter: () => true },
+                { id: 'pop-mov', title: 'POPULAIRES CINÉMA', filter: i => i.type === 'movie' },
+                { id: 'pop-tv', title: 'SÉRIES DU MOMENT', filter: i => i.type === 'tv' }
+            ];
 
             sections.forEach(sec => {
                 const filtered = mainCatalog.filter(sec.filter).slice(0, 15);
-                if (filtered.length === 0) return;
-
                 const row = document.createElement('div');
                 row.className = 'row-section';
                 row.innerHTML = `
@@ -746,11 +801,21 @@
                         <button class="arrow-btn arrow-next" onclick="scrollRow('${sec.id}', 1)">&#10095;</button>
                     </div>
                 `;
-                
                 const scrollEl = row.querySelector('.row-scroll');
                 filtered.forEach(item => scrollEl.appendChild(createCard(item)));
                 grid.appendChild(row);
             });
+        }
+
+        function renderGrid(type) {
+            const grid = document.getElementById('dynamicRows');
+            const filtered = mainCatalog.filter(i => i.type === type);
+            grid.innerHTML = `
+                <div class="row-header" style="margin-top:100px"><h2 class="row-title">${type === 'movie' ? 'TOUS LES FILMS' : 'TOUTES LES SÉRIES'}</h2></div>
+                <div class="grid-view" id="mainGrid"></div>
+            `;
+            const mainGrid = document.getElementById('mainGrid');
+            filtered.forEach(item => mainGrid.appendChild(createCard(item)));
         }
 
         function createCard(item) {
@@ -790,14 +855,20 @@
             document.getElementById('iGenres').innerText = item.genres;
             document.getElementById('iPlayBtn').onclick = () => { closeModal('iModal'); openPlayer(item); };
             
-            // Automation: Deep Fetch Credits
+            // Automation: Deep Fetch Credits & Team
             const castBox = document.getElementById('iCast');
+            const dirBox = document.getElementById('iDirector');
             castBox.innerHTML = '<div class="actor-tag">Sync...</div>';
+            dirBox.innerHTML = 'Sync...';
             
             try {
                 const cred = await fetch(`https://api.themoviedb.org/3/${item.type}/${item.tmdbId}/credits?api_key=${TMDB_KEY}`).then(r => r.json());
-                if(cred && cred.cast) {
-                    castBox.innerHTML = cred.cast.slice(0, 5).map(c => `<div class="actor-tag">${c.name}</div>`).join('');
+                if(cred) {
+                    if(cred.cast) castBox.innerHTML = cred.cast.slice(0, 5).map(c => `<div class="actor-tag">${c.name}</div>`).join('');
+                    if(cred.crew) {
+                        const dir = cred.crew.find(c => c.job === 'Director' || c.job === 'Producer');
+                        if(dir) dirBox.innerText = dir.name;
+                    }
                 }
             } catch(e) { castBox.innerHTML = 'N/A'; }
 
