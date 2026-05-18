@@ -166,10 +166,10 @@ nt); }
         .module-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 25px; padding: 40px; transition: 0.5s var(--transition); cursor: default; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .module-card:hover { transform: translateY(-10px) scale(1.03); background: rgba(255,255,255,0.05); border-color: var(--accent); box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px var(--accent-glow); }
         
-        #compactProgress { position: fixed; bottom: 30px; right: 30px; z-index: 5000; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--glass-border); padding: 12px 25px; border-radius: 20px; display: none; align-items: center; gap: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); backdrop-filter: blur(30px); font-size: 0.7rem; font-weight: 950; color: var(--accent); transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(30px); pointer-events: none; }
+        #compactProgress { position: fixed; bottom: 20px; right: 20px; z-index: 5000; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--glass-border); padding: 8px 18px; border-radius: 12px; display: none; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(40px); font-size: 0.65rem; font-weight: 950; color: var(--accent); transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1); opacity: 0; transform: translateY(20px); pointer-events: none; }
         #compactProgress.visible { display: flex; opacity: 1; transform: translateY(0); }
-        .cp-loader { width: 100px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; }
-        #cp-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.4s; }
+        .cp-loader { width: 60px; height: 2px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; }
+        #cp-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
         .welcome-panel h2 { font-size: 4.5rem; font-weight: 950; color: white; line-height: 1.1; margin-bottom: 10px; }
         .welcome-panel p { color: #f1f5f9; font-weight: 300; font-size: 1.1rem; line-height: 1.8; max-width: 800px; }
         .hero-tag { color: var(--accent) !important; font-weight: 900 !important; font-size: 1.3rem !important; text-transform: uppercase !important; letter-spacing: 6px !important; margin-bottom: 15px; display: block; }
@@ -373,14 +373,14 @@ nt); }
             
             if(skippedSplash) {
                 document.getElementById('cp-bar').style.width = p + '%';
-                document.getElementById('cp-tag').innerText = Math.floor(p) + '% TELEMETRY SYNCED';
+                document.getElementById('cp-tag').innerText = Math.floor(p) + '% SYNC';
                 if(p >= 100) {
                     const cp = document.getElementById('compactProgress');
                     setTimeout(() => {
                         cp.style.opacity = '0';
-                        cp.style.transform = 'translateY(30px)';
-                    }, 3000);
-                    setTimeout(() => cp.remove(), 4000);
+                        cp.style.transform = 'translateY(15px)';
+                    }, 800);
+                    setTimeout(() => cp.remove(), 1500);
                 }
             }
         }
