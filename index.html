@@ -741,25 +741,37 @@
                 const calls = [
                     `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_KEY}&language=fr-FR`,
                     `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}&language=fr-FR`,
-                    `https://api.themoviedb.org/3/tv/top_rated?api_key=${TMDB_KEY}&language=fr-FR`
+                    `https://api.themoviedb.org/3/movie/top_rated?api_key=${TMDB_KEY}&language=fr-FR`,
+                    `https://api.themoviedb.org/3/movie/now_playing?api_key=${TMDB_KEY}&language=fr-FR`,
+                    `https://api.themoviedb.org/3/tv/popular?api_key=${TMDB_KEY}&language=fr-FR`,
+                    `https://api.themoviedb.org/3/tv/top_rated?api_key=${TMDB_KEY}&language=fr-FR`,
+                    `https://api.themoviedb.org/3/tv/on_the_air?api_key=${TMDB_KEY}&language=fr-FR`
                 ];
 
                 const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
                 let raw = [];
                 results.forEach(res => { if(res.results) raw = [...raw, ...res.results] });
 
-                mainCatalog = raw.filter(i => i.poster_path && i.backdrop_path).map(i => ({
+                const fullSet = raw.filter(i => i.poster_path && i.backdrop_path).map(i => ({
                     id: i.id,
                     tmdbId: i.id,
                     type: i.media_type || (i.title ? 'movie' : 'tv'),
                     title: i.title || i.name,
-                    overview: i.overview || "Résumé en cours de chargement pour ce chef-d'œuvre...",
+                    overview: i.overview || "Résumé en cours de chargement...",
                     poster: `https://image.tmdb.org/t/p/w500${i.poster_path}`,
                     backdrop: `https://image.tmdb.org/t/p/original${i.backdrop_path}`,
                     rating: i.vote_average ? i.vote_average.toFixed(1) : "8.5",
                     year: (i.release_date || i.first_air_date || '2024').split('-')[0],
                     genres: i.genre_ids ? i.genre_ids.map(id => GENRES[id] || "Divertissement").slice(0, 3).join(', ') : "Premium"
                 }));
+
+                // Intelligent De-duplication
+                const seen = new Set();
+                mainCatalog = fullSet.filter(item => {
+                    const duplicate = seen.has(item.id);
+                    seen.add(item.id);
+                    return !duplicate;
+                });
 
                 // Unique filter
                 mainCatalog = Array.from(new Map(mainCatalog.map(m => [m.id, m])).values());
