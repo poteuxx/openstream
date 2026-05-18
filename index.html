@@ -240,7 +240,8 @@
         async function syncCatalog() {
             const endpoints = ['trending/all/day', 'movie/popular', 'tv/popular', 'discover/movie?with_genres=99'];
             let calls = [];
-            endpoints.forEach(ep => { for(let p=1; p<=4; p++) calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=fr-FR&page=${p}`); });
+            // MASSIVE FETCH: 8 pages per endpoint to secure 300+ items
+            endpoints.forEach(ep => { for(let p=1; p<=8; p++) calls.push(`https://api.themoviedb.org/3/${ep}?api_key=${TMDB_KEY}&language=fr-FR&page=${p}`); });
             const results = await Promise.all(calls.map(url => fetch(url).then(r => r.json())));
             let raw = [];
             results.forEach(res => { if(res.results) raw = [...raw, ...res.results] });
@@ -258,7 +259,7 @@
             mainCatalog = mainCatalog.filter(i => { const d = seen.has(i.id + i.type); seen.add(i.id + i.type); return !d; });
             
             // RANDOM HERO SELECTION (Variety Engine)
-            const poolSize = Math.min(mainCatalog.length, 20);
+            const poolSize = Math.min(mainCatalog.length, 50);
             const randomIdx = Math.floor(Math.random() * poolSize);
             initHero(mainCatalog[randomIdx]);
         }
@@ -361,10 +362,10 @@
             const area = document.getElementById('mainHomeContent');
             
             const layout = [
-                { t: 'TENDANCES DU MOMENT', items: mainCatalog.slice(0, 12) },
-                { t: 'FILMS INCONTOURNABLES', items: mainCatalog.filter(i => i.type === 'movie').slice(0, 12) },
-                { t: 'SÉRIES ÉLITES', items: mainCatalog.filter(i => i.type === 'tv').slice(0, 12) },
-                { t: 'DOCUMENTAIRES RÉCENTS', items: mainCatalog.filter(i => i.type === 'docu').slice(0, 12) }
+                { t: 'TENDANCES DU MOMENT', items: mainCatalog.slice(0, 24) },
+                { t: 'FILMS INCONTOURNABLES', items: mainCatalog.filter(i => i.type === 'movie').slice(0, 24) },
+                { t: 'SÉRIES ÉLITES', items: mainCatalog.filter(i => i.type === 'tv').slice(0, 24) },
+                { t: 'DOCUMENTAIRES RÉCENTS', items: mainCatalog.filter(i => i.type === 'docu').slice(0, 24) }
             ];
 
             layout.forEach(sec => {
