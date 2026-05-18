@@ -213,7 +213,6 @@
         let playerIsReady = false;
         let heroQueueItem = null;
         let currentLang = 'FR';
-        let voiceEnabled = false;
 
         const LOCALE = {
             FR: { home:'ACCUEIL', films:'FILMS', series:'SÉRIES', docus:'DOCUS', about:'À PROPOS', search:'Rechercher...', config:'CONFIG', play:'LECTURE', details:'DÉTAILS', welcome:'Exploration Dashboard', subWel: 'Découvrez {n} titres premium automatisés.' },
@@ -310,9 +309,7 @@
 
         function toggleConfig() {
             currentLang = currentLang === 'FR' ? 'EN' : 'FR';
-            voiceEnabled = !voiceEnabled; 
             updateUI();
-            speak(currentLang === 'FR' ? "Langue Français activé" : "English Language active");
         }
 
         function updateUI() {
@@ -327,13 +324,6 @@
             
             document.getElementById('hPlayBtn').innerText = l.play;
             document.getElementById('hInfoBtn').innerText = l.details;
-        }
-
-        function speak(txt) {
-            if(!voiceEnabled) return;
-            const s = new SpeechSynthesisUtterance(txt);
-            s.lang = currentLang === 'FR' ? 'fr-FR' : 'en-US';
-            window.speechSynthesis.speak(s);
         }
 
         function switchView(view) {
@@ -380,7 +370,6 @@
             const grid = document.getElementById('dynamicRows');
             grid.innerHTML = `<h2 class="row-title" style="margin-top:100px">GENRE: ${gid}</h2><div class="grid-view" id="genArea"></div>`;
             mainCatalog.filter(i => i.genreIds.includes(gid)).forEach(i => document.getElementById('genArea').appendChild(createCard(i)));
-            speak(currentLang === 'FR' ? "Filtrage activé" : "Filter active");
         }
 
         function createCard(item) {
@@ -401,7 +390,6 @@
         }
 
         async function showItemDetails(item) {
-            speak(item.title);
             const GENRES = {28:"Action",12:"Aventure",16:"Animation",35:"Comédie",80:"Crime",99:"Docu",18:"Drame",10751:"Famille",14:"Fantaisie",36:"Histoire",27:"Horreur",10402:"Musique",9648:"Mystère",10749:"Romance",878:"SF",10770:"Téléfilm",53:"Thriller",10752:"Guerre",37:"Western"};
             document.getElementById('iHero').style.backgroundImage = `url(${item.backdrop})`;
             document.getElementById('iTitle').innerText = item.title;
